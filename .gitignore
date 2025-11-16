@@ -144,6 +144,17 @@ thumbs.db
 *secret*
 *token*
 
+# Runtime and machine-specific files
+go/telemetry/
+dconf/user
+pulse/cookie
+touchegg/*.lock
+*.backup-*
+menus/applications-merged/
+
+# Generated runtime state files
+com.ml4w.hyprlandsettings/hyprctl.json
+
 # Keep the repo focused: allow these directories to be added explicitly
 !/bashrc
 !/zshrc
@@ -168,3 +179,5 @@ thumbs.db
 !/matugen
 !/sidepad
 !/pavucontrol.ini
+!/cava/
+!/btop/
