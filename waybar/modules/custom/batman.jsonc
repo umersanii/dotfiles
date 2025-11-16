@@ -1,0 +1,10 @@
+{
+	"custom/batman": {
+		"format": "🦇",
+		"on-click": "bash ~/.config/waybar/scripts/batman-center.sh",
+		"tooltip": true,
+		"tooltip-format": "Batman Control Center",
+		"exec": "echo '🦇'",
+		"interval": "once"
+	}
+}

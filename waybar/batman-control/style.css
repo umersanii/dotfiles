@@ -1,0 +1,94 @@
+* {
+    font-family: "JetBrains Mono", monospace;
+}
+
+window {
+    background-color: rgba(26, 27, 38, 0.95);
+    border: 2px solid #414868;
+    border-radius: 16px;
+    padding: 0;
+}
+
+#module-container {
+    background-color: #1a1b26;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.module-card {
+    background-color: #24283b;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid #414868;
+}
+
+.module-card:hover {
+    background-color: #2a2e45;
+    border-color: #7aa2f7;
+}
+
+.module-header {
+    font-size: 14px;
+    font-weight: bold;
+    color: #c0caf5;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #414868;
+}
+
+.module-content {
+    color: #a9b1d6;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.stat-label {
+    color: #565f89;
+}
+
+.stat-value {
+    color: #7aa2f7;
+    font-weight: bold;
+}
+
+.todo-item {
+    padding: 8px;
+    margin: 4px 0;
+    background-color: #1a1b26;
+    border-radius: 6px;
+    border-left: 3px solid #7aa2f7;
+}
+
+.todo-item:hover {
+    background-color: #414868;
+}
+
+.action-button {
+    background-color: #414868;
+    color: #a9b1d6;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin: 4px;
+    border: 1px solid #565f89;
+    cursor: pointer;
+}
+
+.action-button:hover {
+    background-color: #7aa2f7;
+    color: #1a1b26;
+    border-color: #7aa2f7;
+}
+
+.empty-state {
+    color: #565f89;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}

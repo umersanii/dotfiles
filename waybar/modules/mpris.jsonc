@@ -1,0 +1,38 @@
+{
+	"mpris": {
+		// "player":
+		// "ignored-players":
+		// "interval":
+		//"format": "{player_icon} {title} - {artist}",
+		//"format-paused": "{status_icon} {title} - {artist}",
+		"format": "{player_icon} {title}",
+		"format-paused": "{status_icon} {title}",
+		"tooltip-format": "Playing: {title} - {artist}",
+		"tooltip-format-paused": "Paused: {title} - {artist}",
+		// "enable-tooltip-len-limits":
+		"on-click": "bash -c 'if [[ -f /tmp/waybar_mpris_paused ]]; then playerctl --player=%any play && rm /tmp/waybar_mpris_paused; else playerctl --player=%any pause && touch /tmp/waybar_mpris_paused; fi'",
+		"on-click-middle": "playerctl --player=%any previous",
+		"on-click-right": "playerctl --player=%any next",
+		"player-icons": {
+			"default": "󰐊"
+		},
+		"status-icons": {
+			"paused": "󰏤"
+		},
+		// "artist-len":
+		// "album-len":
+		// "title-len":
+		// "dynamic-len":
+		// "dynamic-order":
+		// "dynamic-separator":
+		// "dynamic-importance-order":
+		// "truncate-hours":
+		// "ellipsis":
+		// "rotate":
+		// "min-length":
+		"max-length": 100
+		// "align":
+		// "justify":
+		// "expand":
+	}
+}

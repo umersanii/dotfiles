@@ -1,0 +1,12 @@
+{
+	"custom/mpris-filter": {
+		"format": "{}",
+		"max-length": 40,
+		"exec": "bash -c '/home/sadasani/.config/waybar/scripts/mpris-title-filter.sh 2>/dev/null'",
+		"interval": 2,
+		"on-click": "playerctl play-pause",
+		"on-click-middle": "playerctl previous",
+		"on-click-right": "playerctl next",
+		"tooltip-format": "{}"
+	}
+}

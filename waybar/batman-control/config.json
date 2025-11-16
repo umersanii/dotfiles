@@ -1,0 +1,40 @@
+{
+  "modules": {
+    "notifications": {
+      "enabled": true,
+      "title": "Notifications",
+      "icon": "🔔"
+    },
+    "todos": {
+      "enabled": true,
+      "title": "Tasks",
+      "icon": "📝",
+      "max_display": 5
+    },
+    "system": {
+      "enabled": true,
+      "title": "System",
+      "icon": "💻",
+      "show_cpu": true,
+      "show_memory": true,
+      "show_uptime": true
+    },
+    "media": {
+      "enabled": false,
+      "title": "Now Playing",
+      "icon": "🎵"
+    }
+  },
+  "theme": {
+    "background": "#1a1b26",
+    "foreground": "#a9b1d6",
+    "accent": "#7aa2f7",
+    "border": "#414868",
+    "success": "#9ece6a",
+    "warning": "#e0af68",
+    "error": "#f7768e",
+    "border_radius": "12px",
+    "padding": "16px",
+    "gap": "12px"
+  }
+}

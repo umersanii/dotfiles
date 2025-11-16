@@ -1,0 +1,104 @@
+# Ignore caches, browser/profile data, and sensitive files
+
+# Common profile and browser data
+Code/
+Electron/
+Google/
+Vencord/
+discord/
+google-chrome/
+microsoft-edge/
+
+# Cache and temp folders
+Cache/
+Cache*/
+cache*/
+Cached*/
+GPUCache/
+blob_storage/
+Crashpad/
+DawnGraphiteCache/
+DawnWebGPUCache/
+
+# Browser storage and DBs
+Local Storage/
+LocalStorage/
+Local State
+Local\ State
+IndexedDB/
+Service Worker/
+Session Storage/
+Shared Storage/
+SharedStorage/
+SharedStorage-wal/
+Cookies
+Cookies-journal
+*Cookies*
+SingletonCookie
+SingletonLock
+SingletonSocket
+Network Persistent State
+TransportSecurity
+Trust Tokens
+Trust Tokens-journal
+Preferences
+First Run
+
+# Database and journal files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Keys, secrets, env
+*.pem
+*.key
+*.p12
+*.secret
+*.env
+*.asc
+
+# Logs and backups
+*.log
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Editor / OS
+.DS_Store
+thumbs.db
+
+# Local user/credential stores
+.gnupg/
+.ssh/
+
+# Ignore any files that look like secrets
+*password*
+*secret*
+*token*
+
+# Keep the repo focused: allow these directories to be added explicitly
+!/bashrc
+!/zshrc
+!/fastfetch
+!/gtk-3.0/
+!/gtk-4.0/
+!/hypr/
+!/com.ml4w.hyprlandsettings/
+!/kitty/
+!/nvim/
+!/rofi/
+!/waybar/
+!/waypaper/
+!/wlogout
+!/xsettingsd
+!/ohmyposh
+!/nwg-dock-hyprland
+!/swaync
+!/vim
+!/walker
+!/qt6ct
+!/matugen
+!/sidepad
+!/pavucontrol.ini

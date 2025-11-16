@@ -1,0 +1,33 @@
+{
+	"custom/screenshot": {
+		// "exec":
+		// "exec-if":
+		// "exec-on-event":
+		// "hide-empty-text":
+		// "return-type":
+		// "interval":
+		// "restart-interval":
+		// "signal":
+		"format": "󰹑",
+		// "format-icons":
+		// "rotate":
+		"min-length": 2,
+		"max-length": 2,
+		// "align":
+		// "justify":
+		"on-click": "grim -g \"$(slurp)\" - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy && notify-send 'Screenshot taken' -i 'camera-photo' -r 1926",
+		// "on-click-middle":
+		"on-click-right": "grim - | tee ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png | wl-copy && notify-send 'Full screenshot taken' -i 'camera-photo' -r 1926",
+		// "on-update":
+		// "on-scroll-up":
+		// "on-scroll-down":
+		// "smooth-scrolling-threshold":
+		// "tooltip":
+		"tooltip-format": "Screenshot\nLeft: Area\nRight: Full screen"
+		// "escape":
+		// "menu":
+		// "menu-file":
+		// "menu-actions":
+		// "expand":
+	}
+}

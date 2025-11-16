@@ -1,0 +1,48 @@
+/* Pure Black & White theme */
+
+/* base colors - pure black and white only */
+@define-color black         #000000;
+@define-color dark-gray     #111111;
+@define-color darker-gray   	#222222;
+@define-color mid-dark-gray 	#333333;
+@define-color mid-gray      #2a2a2a;
+@define-color gray          #3a3a3a;
+@define-color light-gray    #205050;
+@define-color lighter-gray  #808080;
+@define-color off-white     #cccccc;
+@define-color white         #ffffff;
+
+/*
+	br - border
+	bg - background
+	fg - foreground
+*/
+
+/* main colors */
+
+@define-color accent        @white;
+@define-color main-br       @gray;
+@define-color main-bg       @black;
+@define-color main-fg       @white;
+@define-color hover-bg      @mid-dark-gray;
+@define-color hover-fg      @off-white;
+@define-color outline       @dark-gray;
+
+/* module colors */
+
+@define-color workspaces    @dark-gray;
+@define-color temperature   @dark-gray;
+@define-color memory        @darker-gray;
+@define-color cpu           @mid-dark-gray;
+@define-color time          @mid-dark-gray;
+@define-color date          @darker-gray;
+@define-color tray          @dark-gray;
+@define-color volume        @dark-gray;
+@define-color backlight     @darker-gray;
+@define-color battery       @mid-dark-gray;
+
+/* state colors */
+
+@define-color warning       @lighter-gray;
+@define-color critical      @white;
+@define-color charging      @off-white;
