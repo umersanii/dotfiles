@@ -1,0 +1,106 @@
+/*
+* Css Colors
+* Hardcoded Black & White Theme
+*/
+@define-color blur_background rgba(0, 0, 0, 0.3);
+@define-color blur_background8 rgba(0, 0, 0, 0.8);
+
+    @define-color background rgba(0, 0, 0, 0.8);
+
+    @define-color error #ff0000;
+
+    @define-color error_container #330000;
+
+    @define-color inverse_on_surface #1a1a1a;
+
+    @define-color inverse_primary #ffffff;
+
+    @define-color inverse_surface #ffffff;
+
+    @define-color on_background #ffffff;
+
+    @define-color on_error #ffffff;
+
+    @define-color on_error_container #ffffff;
+
+    @define-color on_primary #000000;
+
+    @define-color on_primary_container #ffffff;
+
+    @define-color on_primary_fixed #000000;
+
+    @define-color on_primary_fixed_variant #000000;
+
+    @define-color on_secondary #000000;
+
+    @define-color on_secondary_container #ffffff;
+
+    @define-color on_secondary_fixed #000000;
+
+    @define-color on_secondary_fixed_variant #000000;
+
+    @define-color on_surface #ffffff;
+
+    @define-color on_surface_variant #cccccc;
+
+    @define-color on_tertiary #000000;
+
+    @define-color on_tertiary_container #ffffff;
+
+    @define-color on_tertiary_fixed #000000;
+
+    @define-color on_tertiary_fixed_variant #000000;
+
+    @define-color outline #666666;
+
+    @define-color outline_variant #333333;
+
+    @define-color primary #ffffff;
+
+    @define-color primary_container rgba(26, 26, 26, 0.8);
+
+    @define-color primary_fixed #ffffff;
+
+    @define-color primary_fixed_dim #cccccc;
+
+    @define-color scrim #000000;
+
+    @define-color secondary #ffffff;
+
+    @define-color secondary_container rgba(26, 26, 26, 0.8);
+
+    @define-color secondary_fixed #ffffff;
+
+    @define-color secondary_fixed_dim #cccccc;
+
+    @define-color shadow #000000;
+
+    @define-color source_color #000000;
+
+    @define-color surface rgba(0, 0, 0, 0.8);
+
+    @define-color surface_bright rgba(51, 51, 51, 0.8);
+
+    @define-color surface_container rgba(26, 26, 26, 0.8);
+
+    @define-color surface_container_high rgba(38, 38, 38, 0.8);
+
+    @define-color surface_container_highest rgba(51, 51, 51, 0.8);
+
+    @define-color surface_container_low rgba(13, 13, 13, 0.8);
+
+    @define-color surface_container_lowest rgba(0, 0, 0, 0.8);
+
+    @define-color surface_dim rgba(0, 0, 0, 0.8);
+
+    @define-color surface_tint #ffffff;
+
+    @define-color surface_variant rgba(26, 26, 26, 0.8);
+
+    @define-color tertiary #cccccc;
+
+    @define-color tertiary_container rgba(26, 26, 26, 0.8);
+
+    @define-color tertiary_fixed #ffffff;
+
+    @define-color tertiary_fixed_dim #cccccc;

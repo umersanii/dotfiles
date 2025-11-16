@@ -1,0 +1,17 @@
+@import 'colors.css';
+
+/* Add transparency to GTK4 windows */
+window,
+.background {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+headerbar,
+.titlebar {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+popover,
+.popover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
