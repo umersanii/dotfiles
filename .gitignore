@@ -1,3 +1,69 @@
+# Ignore browser / Electron profiles, caches and runtime state
+# VS Code user data and caches (keep only hand-edited settings if any)
+Code/**/Cache/
+Code/**/GPUCache/
+Code/**/Crashpad*/
+Code/**/blob_storage/
+Code/**/IndexedDB/
+Code/**/Local Storage/
+Code/**/Local Storage/**
+Code/**/Service Worker/
+Code/**/Session Storage/
+Code/**/SharedStorage/
+Code/**/Shared Dictionary/
+Code/**/TransportSecurity/
+Code/**/Trust Tokens*/
+Code/**/First Run
+Code/**/DawnWebGPUCache/
+
+# Browser / Edge / Chrome / Discord / Electron runtime folders
+google-chrome/
+microsoft-edge/
+discord/
+Electron/
+Vencord/
+
+# General caches, DB journals and blobs
+**/Cache/
+**/cache/
+**/GPUCache/
+**/Crashpad*/
+**/blob_storage/
+**/*-journal
+**/*-wal
+
+# Browser storage DBs and large runtime stores
+**/Local Storage/
+**/IndexedDB/
+**/Service Worker/
+**/Session Storage/
+**/SharedStorage/
+
+# Dotfile-machine-local / runtime artifacts
+.cache/
+Cache/
+*.log
+*.sqlite
+*.db
+
+# Common developer artifacts
+node_modules/
+dist/
+build/
+
+# Editor / OS cruft
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Ignore generated backups and large binary caches
+**/CrashpadMetrics-*
+**/DawnGraphiteCache/
+**/DawnWebGPUCache/
+
+# Add any other local-only overrides below
+# e.g. host-specific state you don't want to commit
+# host.local
 # Ignore caches, browser/profile data, and sensitive files
 
 # Common profile and browser data

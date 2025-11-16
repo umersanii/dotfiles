@@ -30,6 +30,7 @@
 	background-position: center;
 	min-width: 28px;
 	min-height: 28px;
+	margin-left: 5px;
 	transition: background-size 220ms ease;
 }
 
