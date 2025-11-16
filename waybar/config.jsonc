@@ -35,6 +35,8 @@
 		"~/.config/waybar/modules/network.jsonc",
 		"~/.config/waybar/modules/bluetooth.jsonc",
 		"~/.config/waybar/modules/custom/system_update.jsonc",
+		"~/.config/waybar/modules/custom/empty.jsonc",
+
 
 		// modules-right
 		"~/.config/waybar/modules/custom/screenshot.jsonc",
@@ -66,9 +68,11 @@
 	],
 	"modules-center": [
 		//"hyprland/windowcount",
+		//"custom/empty",
+		//"custom/empty",
+
 		"custom/left_div#2",
 		"custom/screenshot",
-		"wlr/tray",
 
 
 		"temperature",

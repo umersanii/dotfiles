@@ -64,6 +64,11 @@
 	background-color: @tray;
 
 }
+
+#custom-empty {
+	padding: 0 10px;
+	background-color: @tray;
+}
 /*------------------
     window title
 ------------------*/
