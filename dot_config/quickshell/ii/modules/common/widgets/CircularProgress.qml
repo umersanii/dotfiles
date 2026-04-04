@@ -2,9 +2,6 @@ import QtQuick
 import QtQuick.Shapes
 import qs.modules.common
 
-/**
- * Material 3 circular progress. See https://m3.material.io/components/progress-indicators/specs
- */
 Item {
     id: root
 
@@ -26,42 +23,23 @@ Item {
     property real degree: 0
     property real centerX: root.width / 2
     property real centerY: root.height / 2
-    property real arcRadius: root.implicitSize / 2 - root.lineWidth
+    property real arcRadius: root.width / 2 - root.lineWidth
     property real startAngle: -90
 
-    onValueChanged: {
-        degree = value * 360
-    }
+    onValueChanged: { degree = value * 360 }
 
-    Component.onCompleted: {
-        degree = value * 360
-    }
-
-    Behavior on degree {
-        enabled: root.enableAnimation
-        NumberAnimation {
-            duration: root.animationDuration
-            easing.type: root.easingType
-        }
-    }
-
-    Loader {
-        active: root.fill
+    Rectangle {
+        id: bgCircle
+        visible: root.fill
         anchors.fill: parent
-        
-        sourceComponent: Rectangle {
-            radius: 9999
-            color: root.colSecondary
-        }
+        radius: width / 2
+        color: root.colSecondary
     }
 
     Shape {
         anchors.fill: parent
-        layer.enabled: true
-        layer.smooth: true
-        preferredRendererType: Shape.CurveRenderer
+        visible: false // HIDE SHAPE FOR TESTING
         ShapePath {
-            id: secondaryPath
             strokeColor: root.colSecondary
             strokeWidth: root.lineWidth
             capStyle: ShapePath.RoundCap
@@ -76,7 +54,6 @@ Item {
             }
         }
         ShapePath {
-            id: primaryPath
             strokeColor: root.colPrimary
             strokeWidth: root.lineWidth
             capStyle: ShapePath.RoundCap
@@ -91,5 +68,4 @@ Item {
             }
         }
     }
-
 }
