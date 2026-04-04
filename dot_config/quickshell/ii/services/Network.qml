@@ -43,12 +43,12 @@ Singleton {
                 Network.networkStrength > 50 ? "network_wifi_3_bar" :
                 Network.networkStrength > 33 ? "network_wifi_2_bar" :
                 Network.networkStrength > 17 ? "network_wifi_1_bar" :
-                "signal_wifi_0_bar"
+                "signal_cellular_connected_no_internet_0_bar"
             )
             : (root.wifiStatus === "connecting")
-                ? "signal_wifi_statusbar_not_connected"
+                ? "settings_ethernet"
                 : (root.wifiStatus === "disconnected")
-                    ? "wifi_find"
+                    ? "wifi_off"
                     : (root.wifiStatus === "disabled")
                         ? "signal_wifi_off"
                         : "signal_wifi_bad"
