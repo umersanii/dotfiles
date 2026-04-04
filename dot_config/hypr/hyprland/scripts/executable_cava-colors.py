@@ -10,7 +10,7 @@ CAVA_CONFIG    = os.path.expanduser("~/.config/cava/config")
 PLAYERS        = "firefox,edge,chromium,chrome"
 ART_CACHE      = os.path.expanduser("~/.cache/cava-colors/art")
 KEY_COLOR_FILE = "/tmp/cava-key-color"
-DEFAULT        = ["#3a3a3a", "#4d4d4d", "#606060", "#747474", "#888888", "#9b9b9b", "#aeaeae", "#c2c2c2"]
+DEFAULT        = ["#3a3a3a", "#4d4d4d", "#606060", "#747474", "#888888", "#9b9b9b", "#aeaeae", "#c2c2c2", "#ffffff"]
 DEFAULT_KEY    = "888888"
 
 os.makedirs(os.path.dirname(ART_CACHE), exist_ok=True)
@@ -144,6 +144,7 @@ def main():
                     if key:
                         h, s, v = key
                         gradient = build_gradient(h, s, v)
+                        gradient.append("#ffffff")
                         apply_gradient(gradient)
                         # Write middle stop as key color for other processes
                         mid = gradient[len(gradient) // 2].lstrip("#")
