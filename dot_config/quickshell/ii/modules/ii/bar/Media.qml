@@ -8,12 +8,32 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Mpris
 import Quickshell.Hyprland
+import Quickshell.Io
 
 Item {
     id: root
     property bool borderless: Config.options.bar.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || Translation.tr("No media")
+
+    property list<real> visualizerPoints: []
+
+    Process {
+        id: cavaProc
+        running: activePlayer?.playbackState === MprisPlaybackState.Playing
+        onRunningChanged: {
+            if (!cavaProc.running) {
+                root.visualizerPoints = [];
+            }
+        }
+        command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/raw_output_config.txt`]
+        stdout: SplitParser {
+            onRead: data => {
+                let points = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
+                root.visualizerPoints = points;
+            }
+        }
+    }
 
     Layout.fillHeight: true
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
@@ -24,6 +44,14 @@ Item {
         interval: Config.options.resources.updateInterval
         repeat: true
         onTriggered: activePlayer.positionChanged()
+    }
+
+    property bool showingTitle: false
+
+    Timer {
+        id: titleTimer
+        interval: 5000
+        onTriggered: root.showingTitle = false
     }
 
     MouseArea {
@@ -37,11 +65,8 @@ Item {
             } else if (event.button === Qt.ForwardButton || event.button === Qt.RightButton) {
                 MprisController.next();
             } else if (event.button === Qt.LeftButton) {
-                /*
-                const proc = qs.createProcess(["playerctl", "play-pause"])
-                proc.running = true;
-                */
-                GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen
+                root.showingTitle = !root.showingTitle;
+                if (root.showingTitle) titleTimer.restart();
             }
         }
     }
@@ -76,16 +101,44 @@ Item {
             }
         }
 
-        StyledText {
+        Item { // Title & Visualizer container
             visible: Config.options.bar.verbose
-            width: rowLayout.width - (mediaCircProg.width + rowLayout.spacing * 2)
             Layout.alignment: Qt.AlignVCenter
-            Layout.fillWidth: true // Ensures the text takes up available space
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             Layout.rightMargin: rowLayout.spacing
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight // Truncates the text on the right
-            color: Appearance.colors.colOnLayer1
-            text: `${cleanedTitle}${activePlayer?.trackArtist ? ' • ' + activePlayer.trackArtist : ''}`
+            clip: true
+
+            WaveVisualizer {
+                anchors.fill: parent
+                // Visualizer margins for the cava height effect
+                anchors.topMargin: 4
+                anchors.bottomMargin: 4
+                opacity: root.showingTitle ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: 250 } }
+
+                live: root.activePlayer?.playbackState === MprisPlaybackState.Playing
+                points: root.visualizerPoints
+                maxVisualizerValue: 1000
+                smoothing: 2
+                color: "white"
+                fillAlpha: 1.0
+                centerBass: true
+                horizontalFade: true
+            }
+
+            StyledText {
+                id: mediaTitle
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
+                color: "white"
+                text: `${cleanedTitle}${activePlayer?.trackArtist ? ' • ' + activePlayer.trackArtist : ''}`
+                opacity: root.showingTitle ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 250 } }
+                font.pixelSize: Appearance.font.pixelSize.small
+            }
         }
 
     }
