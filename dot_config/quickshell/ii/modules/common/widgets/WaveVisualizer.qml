@@ -13,6 +13,12 @@ Canvas { // Visualizer
     property bool live: true
     property color color: Appearance.m3colors.m3primary
 
+    property real fillAlpha: 0.15
+
+    property bool centerBass: false
+
+    property bool horizontalFade: false
+
     onPointsChanged: () => {
         root.requestPaint()
     }
@@ -43,6 +49,21 @@ Canvas { // Visualizer
         }
         if (!root.live) root.smoothPoints.fill(0); // If not playing, show no points
 
+        if (root.centerBass && n > 0) {
+            var reordered = new Array(n);
+            var mid = Math.floor(n / 2);
+            for (var k = 0; k < n; k++) {
+                if (k % 2 === 0) {
+                    reordered[mid + Math.floor(k / 2)] = root.smoothPoints[k];
+                } else {
+                    reordered[mid - Math.ceil(k / 2)] = root.smoothPoints[k];
+                }
+            }
+            // Fill any empty spots if there's an odd array len logic edge case
+            for (var m = 0; m < n; m++) if (reordered[m] === undefined) reordered[m] = 0;
+            root.smoothPoints = reordered;
+        }
+
         ctx.beginPath();
         ctx.moveTo(0, h);
         for (var i = 0; i < n; ++i) {
@@ -53,12 +74,21 @@ Canvas { // Visualizer
         ctx.lineTo(w, h);
         ctx.closePath();
 
-        ctx.fillStyle = Qt.rgba(
-            root.color.r,
-            root.color.g,
-            root.color.b,
-            0.15
-        );
+        if (root.horizontalFade) {
+            var gradient = ctx.createLinearGradient(0, 0, w, 0);
+            gradient.addColorStop(0, Qt.rgba(root.color.r, root.color.g, root.color.b, 0));
+            gradient.addColorStop(0.2, Qt.rgba(root.color.r, root.color.g, root.color.b, root.fillAlpha));
+            gradient.addColorStop(0.8, Qt.rgba(root.color.r, root.color.g, root.color.b, root.fillAlpha));
+            gradient.addColorStop(1.0, Qt.rgba(root.color.r, root.color.g, root.color.b, 0));
+            ctx.fillStyle = gradient;
+        } else {
+            ctx.fillStyle = Qt.rgba(
+                root.color.r,
+                root.color.g,
+                root.color.b,
+                root.fillAlpha
+            );
+        }
         ctx.fill();
     }
 
