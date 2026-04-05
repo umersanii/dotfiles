@@ -14,6 +14,7 @@ Item {
     id: root
     property bool borderless: Config.options.bar.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
+    readonly property bool isActive: (activePlayer?.playbackState === MprisPlaybackState.Playing || root.showingTitle)
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || Translation.tr("No media")
 
     property list<real> visualizerPoints: []
@@ -36,6 +37,7 @@ Item {
     }
 
     Layout.fillHeight: true
+    Layout.fillWidth: isActive
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
     implicitHeight: Appearance.sizes.barHeight
 
@@ -102,11 +104,22 @@ Item {
         }
 
         Item { // Title & Visualizer container
-            visible: Config.options.bar.verbose
+            id: mediaTitleContainer
+            visible: Config.options.bar.verbose && (root.isActive || width > 0)
             Layout.alignment: Qt.AlignVCenter
-            Layout.fillWidth: true
+            Layout.fillWidth: root.isActive
             Layout.fillHeight: true
-            Layout.rightMargin: rowLayout.spacing
+            Layout.rightMargin: root.isActive ? rowLayout.spacing : 0
+            Layout.preferredWidth: root.isActive ? 150 : 0
+
+            Behavior on Layout.preferredWidth {
+                animation: Appearance.animation.elementResize.numberAnimation.createObject(mediaTitleContainer)
+            }
+
+            opacity: isActive ? 1 : 0
+            Behavior on opacity {
+                NumberAnimation { duration: 250 }
+            }
             clip: true
 
             WaveVisualizer {
