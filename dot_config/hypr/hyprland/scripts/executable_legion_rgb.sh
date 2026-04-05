@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# test comment for chezmoi auto-sync
 
 set -euo pipefail
 
