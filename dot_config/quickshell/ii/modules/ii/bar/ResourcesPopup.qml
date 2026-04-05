@@ -104,6 +104,24 @@ StyledPopup {
             spacing: 8
 
             StyledPopupHeaderRow {
+                icon: "developer_board"
+                label: "GPU"
+            }
+            Column {
+                spacing: 4
+                StyledPopupValueRow {
+                    icon: "bolt"
+                    label: Translation.tr("Usage:")
+                    value: `${Math.round(ResourceUsage.gpuUsage * 100)}%`
+                }
+            }
+        }
+
+        Column {
+            anchors.top: parent.top
+            spacing: 8
+
+            StyledPopupHeaderRow {
                 icon: "cloud_download"
                 label: "Network"
             }
