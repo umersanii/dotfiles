@@ -38,6 +38,7 @@ StyledPopup {
                     icon: "clock_loader_60"
                     label: Translation.tr("Used:")
                     value: root.formatKB(ResourceUsage.memoryUsed)
+                    valueColor: ResourceUsage.memoryUsedPercentage >= 0.85 ? Appearance.colors.colError : (ResourceUsage.memoryUsedPercentage >= 0.70 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant)
                 }
                 StyledPopupValueRow {
                     icon: "check_circle"
@@ -67,6 +68,7 @@ StyledPopup {
                     icon: "clock_loader_60"
                     label: Translation.tr("Used:")
                     value: root.formatKB(ResourceUsage.swapUsed)
+                    valueColor: ResourceUsage.swapUsedPercentage >= 0.85 ? Appearance.colors.colError : (ResourceUsage.swapUsedPercentage >= 0.70 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant)
                 }
                 StyledPopupValueRow {
                     icon: "check_circle"
@@ -95,6 +97,7 @@ StyledPopup {
                     icon: "bolt"
                     label: Translation.tr("Load:")
                     value: `${Math.round(ResourceUsage.cpuUsage * 100)}%`
+                    valueColor: ResourceUsage.cpuUsage >= 0.85 ? Appearance.colors.colError : (ResourceUsage.cpuUsage >= 0.70 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant)
                 }
             }
         }
@@ -111,8 +114,9 @@ StyledPopup {
                 spacing: 4
                 StyledPopupValueRow {
                     icon: "bolt"
-                    label: Translation.tr("Usage:")
+                    label: Translation.tr("Load:")
                     value: `${Math.round(ResourceUsage.gpuUsage * 100)}%`
+                    valueColor: ResourceUsage.gpuUsage >= 0.85 ? Appearance.colors.colError : (ResourceUsage.gpuUsage >= 0.70 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant)
                 }
             }
         }
@@ -131,11 +135,13 @@ StyledPopup {
                     icon: "arrow_downward"
                     label: Translation.tr("Download:")
                     value: root.formatSpeed(ResourceUsage.networkDownloadSpeed)
+                    valueColor: ((ResourceUsage.networkDownloadSpeed + ResourceUsage.networkUploadSpeed) / 2 / 12800 >= 0.8) ? "#22C55E" : Appearance.colors.colOnSurfaceVariant
                 }
                 StyledPopupValueRow {
                     icon: "arrow_upward"
                     label: Translation.tr("Upload:")
                     value: root.formatSpeed(ResourceUsage.networkUploadSpeed)
+                    valueColor: ((ResourceUsage.networkDownloadSpeed + ResourceUsage.networkUploadSpeed) / 2 / 12800 >= 0.8) ? "#22C55E" : Appearance.colors.colOnSurfaceVariant
                 }
             }
         }
