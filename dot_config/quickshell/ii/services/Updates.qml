@@ -16,6 +16,7 @@ Singleton {
     property alias checking: checkUpdatesProc.running
     property int count: 0
     
+    readonly property bool anyUpdates: available && count > 0
     readonly property bool updateAdvised: available && count > Config.options.updates.adviseUpdateThreshold
     readonly property bool updateStronglyAdvised: available && count > Config.options.updates.stronglyAdviseUpdateThreshold
 
@@ -36,19 +37,24 @@ Singleton {
         }
     }
 
+    property string updateChecker: "checkupdates"
+
     Process {
         id: checkAvailabilityProc
         running: true
-        command: ["which", "checkupdates"]
-        onExited: (exitCode, exitStatus) => {
-            root.available = (exitCode === 0);
-            root.refresh();
+        command: ["bash", "-c", "if which checkupdates >/dev/null; then echo 'checkupdates'; elif which yay >/dev/null; then echo 'yay -Qu'; else exit 1; fi"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.updateChecker = text.trim();
+                root.available = true;
+                root.refresh();
+            }
         }
     }
 
     Process {
         id: checkUpdatesProc
-        command: ["bash", "-c", "checkupdates | wc -l"]
+        command: ["bash", "-c", `${root.updateChecker} | wc -l`]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.count = parseInt(text.trim());
