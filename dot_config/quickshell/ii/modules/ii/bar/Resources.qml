@@ -38,6 +38,15 @@ MouseArea {
         }
 
         Resource {
+            iconName: "developer_board"
+            percentage: ResourceUsage.gpuUsage
+            shown: percentage > 0.01 || root.alwaysShowAllResources
+            Layout.leftMargin: shown ? 6 : 0
+            warningThreshold: Config.options.bar.resources.cpuWarningThreshold
+            customColor: percentage >= 0.95 ? Appearance.colors.colError : (percentage >= 0.8 ? "#FBBC04" : null)
+        }
+
+        Resource {
             iconName: "cloud_download"
             percentage: Math.min(1, (ResourceUsage.networkDownloadSpeed + ResourceUsage.networkUploadSpeed) / 2 / 12800)
             shown: (ResourceUsage.networkDownloadSpeed > 0 || ResourceUsage.networkUploadSpeed > 0) ||
