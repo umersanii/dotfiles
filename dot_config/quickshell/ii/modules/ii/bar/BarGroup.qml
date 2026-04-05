@@ -9,6 +9,7 @@ Item {
     implicitWidth: vertical ? Appearance.sizes.baseVerticalBarWidth : (gridLayout.implicitWidth + padding * 2)
     implicitHeight: vertical ? (gridLayout.implicitHeight + padding * 2) : Appearance.sizes.baseBarHeight
     default property alias items: gridLayout.children
+    readonly property real calculatedImplicitWidth: gridLayout.implicitWidth + padding * 2
 
     Rectangle {
         id: background
