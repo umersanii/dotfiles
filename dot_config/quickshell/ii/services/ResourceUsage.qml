@@ -21,6 +21,7 @@ Singleton {
     property real swapUsedPercentage: swapTotal > 0 ? (swapUsed / swapTotal) : 0
     property real cpuUsage: 0
     property var previousCpuStats
+    property real gpuUsage: 0 // Added
     
     // Network properties
     property real networkDownloadSpeed: 0  // KB/s
@@ -37,6 +38,7 @@ Singleton {
     property list<real> swapUsageHistory: []
     property list<real> networkDownloadSpeedHistory: []
     property list<real> networkUploadSpeedHistory: []
+    property list<real> gpuUsageHistory: [] // Added
 
     function kbToGbString(kb) {
         return (kb / (1024 * 1024)).toFixed(1) + " GB";
@@ -72,12 +74,19 @@ Singleton {
             networkUploadSpeedHistory.shift()
         }
     }
+    function updateGpuUsageHistory() { // Added
+        gpuUsageHistory = [...gpuUsageHistory, gpuUsage]
+        if (gpuUsageHistory.length > historyLength) {
+            gpuUsageHistory.shift()
+        }
+    }
     function updateHistories() {
         updateMemoryUsageHistory()
         updateSwapUsageHistory()
         updateCpuUsageHistory()
         updateNetworkDownloadSpeedHistory()
         updateNetworkUploadSpeedHistory()
+        updateGpuUsageHistory() // Added
     }
 
 	Timer {
@@ -148,6 +157,7 @@ Singleton {
             previousNetworkStats = { rx: totalRxBytes, tx: totalTxBytes }
 
             root.updateHistories()
+            gpuUsageProc.run() // Added
             interval = Config.options?.resources?.updateInterval ?? 3000
         }
 	}
@@ -168,6 +178,16 @@ Singleton {
             id: outputCollector
             onStreamFinished: {
                 root.maxAvailableCpuString = (parseFloat(outputCollector.text) / 1000).toFixed(0) + " GHz"
+            }
+        }
+    }
+
+    Process {
+        id: gpuUsageProc
+        command: ["bash", "-c", "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || cat /sys/class/drm/card1/device/gpu_busy_percent 2>/dev/null || echo 0"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.gpuUsage = (parseFloat(text) || 0) / 100
             }
         }
     }
