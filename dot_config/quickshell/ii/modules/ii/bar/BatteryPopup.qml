@@ -19,6 +19,13 @@ StyledPopup {
         }
 
         StyledPopupValueRow {
+            icon: "battery_charging_full"
+            label: Translation.tr("Level:")
+            value: `${Math.round(Battery.percentage * 100)}%`
+            valueColor: Battery.isCharging ? "#22C55E" : (Battery.percentage <= 0.10 ? Appearance.colors.colError : (Battery.percentage <= 0.20 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant))
+        }
+
+        StyledPopupValueRow {
             visible: {
                 let timeValue = Battery.isCharging ? Battery.timeToFull : Battery.timeToEmpty;
                 let power = Battery.energyRate;
@@ -40,6 +47,7 @@ StyledPopup {
                 else
                     return formatTime(Battery.timeToEmpty);
             }
+            valueColor: Battery.isCharging ? "#22C55E" : (Battery.percentage <= 0.10 ? Appearance.colors.colError : (Battery.percentage <= 0.20 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant))
         }
 
         StyledPopupValueRow {
@@ -61,6 +69,7 @@ StyledPopup {
                     return `${Battery.energyRate.toFixed(2)}W`;
                 }
             }
+            valueColor: Battery.isCharging ? "#22C55E" : (Battery.percentage <= 0.10 ? Appearance.colors.colError : (Battery.percentage <= 0.20 ? "#FBBC04" : Appearance.colors.colOnSurfaceVariant))
         }
 
         StyledPopupValueRow {
