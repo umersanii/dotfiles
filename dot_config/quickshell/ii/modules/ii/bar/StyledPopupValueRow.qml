@@ -8,6 +8,7 @@ RowLayout {
     required property string icon
     required property string label
     required property string value
+    property color valueColor: Appearance.colors.colOnSurfaceVariant
     spacing: 4
 
     MaterialSymbol {
@@ -23,7 +24,7 @@ RowLayout {
         Layout.fillWidth: true
         horizontalAlignment: Text.AlignRight
         visible: root.value !== ""
-        color: Appearance.colors.colOnSurfaceVariant
+        color: root.valueColor
         text: root.value
     }
 }
