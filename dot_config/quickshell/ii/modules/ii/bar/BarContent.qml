@@ -171,7 +171,12 @@ Item { // Bar content region
         BarGroup {
             id: leftCenterGroup
             anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: root.centerSideModuleWidth
+            readonly property bool isExpanded: (mediaWidget.isActive || root.useShortenedForm >= 1)
+            implicitWidth: isExpanded ? root.centerSideModuleWidth : calculatedImplicitWidth
+
+            Behavior on implicitWidth {
+                animation: Appearance.animation.elementResize.numberAnimation.createObject(leftCenterGroup)
+            }
 
             Resources {
                 alwaysShowAllResources: root.useShortenedForm === 2
@@ -179,8 +184,9 @@ Item { // Bar content region
             }
 
             Media {
+                id: mediaWidget
                 visible: root.useShortenedForm < 2
-                Layout.fillWidth: true
+                Layout.fillWidth: mediaWidget.isActive
             }
         }
 
