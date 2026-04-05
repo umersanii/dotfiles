@@ -6,7 +6,19 @@ STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/legion-rgb"
 STATE_FILE="$STATE_DIR/state"
 
 PALETTE=(
-    FFFFFF
+    FFFFFF # White
+    FF0000 # Red
+    00FF00 # Green
+    0000FF # Blue
+    FFFF00 # Yellow
+    00FFFF # Cyan
+    FF00FF # Magenta
+    FF5500 # Orange
+    55FF00 # Lime
+    00FF55 # Spring Green
+    0055FF # Azure
+    5500FF # Violet
+    FF0055 # Rose
 )
 
 EFFECTS=(
@@ -16,8 +28,9 @@ EFFECTS=(
     "Spectrum Cycle"
 )
 
+
 DEVICE_INDEX=""
-BREATHING_SPEED=30
+BREATHING_SPEED=15
 
 notify() {
     if command -v notify-send >/dev/null 2>&1; then
@@ -145,6 +158,15 @@ main() {
             cycle_effect
             ;;
         white-breathing)
+            ensure_state_file
+            # Find Breathing index
+            for i in "${!EFFECTS[@]}"; do
+                if [[ "${EFFECTS[$i]}" == "Breathing" ]]; then
+                    EFFECT_INDEX=$i
+                    break
+                fi
+            done
+            save_state
             set_effect "Breathing"
             ;;
         color)
