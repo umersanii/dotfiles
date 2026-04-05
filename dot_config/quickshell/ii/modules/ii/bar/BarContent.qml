@@ -1,6 +1,7 @@
 import qs.modules.ii.bar.weather
 import QtQuick
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.UPower
@@ -30,54 +31,62 @@ Item { // Bar content region
         id: logoRoot
         implicitWidth: 28
         implicitHeight: 28
-        property bool shouldAnimate: Updates.updateStronglyAdvised
-        property real spin: 0
+        property bool updatesAvailable: Updates.anyUpdates
+        property real glowOpacity: 0
 
-        onShouldAnimateChanged: {
-            if (!shouldAnimate) {
-                spin = 0;
-                scale = 1.0;
+        onUpdatesAvailableChanged: {
+            if (!updatesAvailable) {
+                glowOpacity = 0;
             }
         }
 
         Rectangle {
             anchors.fill: parent
             radius: Appearance.rounding.full
-            color: shouldAnimate ? ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.15) : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 0.35)
+            color: updatesAvailable ? ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.15) : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 0.35)
             border.width: 1
-            border.color: shouldAnimate ? Appearance.colors.colSecondary : Appearance.colors.colLayer0Border
+            border.color: updatesAvailable ? Appearance.colors.colSecondary : Appearance.colors.colLayer0Border
         }
 
-        IconImage {
-            anchors.centerIn: parent
-            width: 18
-            height: 18
-            source: Quickshell.iconPath(SystemInfo.logo)
-            rotation: logoRoot.spin
-        }
-
-        NumberAnimation on spin {
-            from: 0
-            to: 360
-            duration: 10000
-            loops: Animation.Infinite
-            running: logoRoot.shouldAnimate
-            easing.type: Easing.Linear
-        }
-
-        SequentialAnimation on scale {
-            loops: Animation.Infinite
-            running: logoRoot.shouldAnimate
-            NumberAnimation {
-                to: 1.05
-                duration: 1400
-                easing.type: Easing.InOutQuad
+        MouseArea {
+            id: logoMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            z: 1
+            onPressed: event => event.accepted = true
+            onClicked: {
+                Quickshell.execDetached(["sh", "-c", Config.options.apps.update]);
             }
-            NumberAnimation {
-                to: 1.0
-                duration: 1400
-                easing.type: Easing.InOutQuad
+
+            IconImage {
+                id: logoIcon
+                anchors.centerIn: parent
+                width: 18
+                height: 18
+                source: Quickshell.iconPath(SystemInfo.logo)
             }
+
+            Glow {
+                anchors.fill: logoIcon
+                source: logoIcon
+                radius: 12
+                samples: 25
+                color: Appearance.colors.colSecondary
+                opacity: logoRoot.glowOpacity
+                visible: updatesAvailable
+            }
+
+            StyledToolTip {
+                text: Translation.tr("%1 updates available").arg(Updates.count)
+                extraVisibleCondition: updatesAvailable && logoMouseArea.containsMouse
+            }
+        }
+
+        SequentialAnimation on glowOpacity {
+            loops: Animation.Infinite
+            running: logoRoot.updatesAvailable
+            NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutQuad }
+            NumberAnimation { to: 0.1; duration: 1500; easing.type: Easing.InOutQuad }
         }
     }
 
