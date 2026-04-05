@@ -32,7 +32,7 @@ Item {
             value: percentage
             implicitSize: 20
             colPrimary: "black"
-            colSecondary: "white"
+            colSecondary: root.colActive
             accountForLightBleeding: !root.warning
             enableAnimation: true
 
