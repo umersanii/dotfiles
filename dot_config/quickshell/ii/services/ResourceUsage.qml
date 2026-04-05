@@ -21,7 +21,7 @@ Singleton {
     property real swapUsedPercentage: swapTotal > 0 ? (swapUsed / swapTotal) : 0
     property real cpuUsage: 0
     property var previousCpuStats
-    property real gpuUsage: 0 // Added
+    property real gpuUsage: 0
     
     // Network properties
     property real networkDownloadSpeed: 0  // KB/s
@@ -38,7 +38,7 @@ Singleton {
     property list<real> swapUsageHistory: []
     property list<real> networkDownloadSpeedHistory: []
     property list<real> networkUploadSpeedHistory: []
-    property list<real> gpuUsageHistory: [] // Added
+    property list<real> gpuUsageHistory: []
 
     function kbToGbString(kb) {
         return (kb / (1024 * 1024)).toFixed(1) + " GB";
@@ -74,7 +74,7 @@ Singleton {
             networkUploadSpeedHistory.shift()
         }
     }
-    function updateGpuUsageHistory() { // Added
+    function updateGpuUsageHistory() {
         gpuUsageHistory = [...gpuUsageHistory, gpuUsage]
         if (gpuUsageHistory.length > historyLength) {
             gpuUsageHistory.shift()
@@ -86,7 +86,7 @@ Singleton {
         updateCpuUsageHistory()
         updateNetworkDownloadSpeedHistory()
         updateNetworkUploadSpeedHistory()
-        updateGpuUsageHistory() // Added
+        updateGpuUsageHistory()
     }
 
 	Timer {
@@ -157,7 +157,6 @@ Singleton {
             previousNetworkStats = { rx: totalRxBytes, tx: totalTxBytes }
 
             root.updateHistories()
-            gpuUsageProc.run() // Added
             interval = Config.options?.resources?.updateInterval ?? 3000
         }
 	}
@@ -165,6 +164,31 @@ Singleton {
 	FileView { id: fileMeminfo; path: "/proc/meminfo" }
     FileView { id: fileStat; path: "/proc/stat" }
     FileView { id: fileNetDev; path: "/proc/net/dev" }
+
+    // GPU usage polling — tries nvidia-smi first, falls back to AMD sysfs
+    Timer {
+        id: gpuPollTimer
+        interval: Config.options?.resources?.updateInterval ?? 3000
+        running: true
+        repeat: true
+        onTriggered: gpuProc.running = true
+    }
+
+    Process {
+        id: gpuProc
+        running: true
+        command: ["bash", "-c",
+            "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 || " +
+            "cat /sys/class/drm/card0/device/gpu_busy_percent 2>/dev/null || " +
+            "cat /sys/class/drm/card1/device/gpu_busy_percent 2>/dev/null || echo 0"]
+        stdout: StdioCollector {
+            id: gpuOutput
+            onStreamFinished: {
+                const val = parseInt(gpuOutput.text.trim(), 10)
+                root.gpuUsage = isNaN(val) ? 0 : Math.min(100, Math.max(0, val)) / 100.0
+            }
+        }
+    }
 
     Process {
         id: findCpuMaxFreqProc
@@ -178,16 +202,6 @@ Singleton {
             id: outputCollector
             onStreamFinished: {
                 root.maxAvailableCpuString = (parseFloat(outputCollector.text) / 1000).toFixed(0) + " GHz"
-            }
-        }
-    }
-
-    Process {
-        id: gpuUsageProc
-        command: ["bash", "-c", "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || cat /sys/class/drm/card1/device/gpu_busy_percent 2>/dev/null || echo 0"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.gpuUsage = (parseFloat(text) || 0) / 100
             }
         }
     }
