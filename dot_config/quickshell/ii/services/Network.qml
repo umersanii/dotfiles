@@ -38,12 +38,11 @@ Singleton {
         ? "lan"
         : root.wifiEnabled
             ? (
-                Network.networkStrength > 83 ? "signal_wifi_4_bar" :
-                Network.networkStrength > 67 ? "network_wifi" :
-                Network.networkStrength > 50 ? "network_wifi_3_bar" :
-                Network.networkStrength > 33 ? "network_wifi_2_bar" :
-                Network.networkStrength > 17 ? "network_wifi_1_bar" :
-                "signal_cellular_connected_no_internet_0_bar"
+                root.networkStrength > 80 ? "signal_wifi_4_bar" :
+                root.networkStrength > 60 ? "signal_wifi_3_bar" :
+                root.networkStrength > 40 ? "signal_wifi_2_bar" :
+                root.networkStrength > 20 ? "signal_wifi_1_bar" :
+                "signal_wifi_0_bar"
             )
             : (root.wifiStatus === "connecting")
                 ? "settings_ethernet"
