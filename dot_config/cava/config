@@ -545,14 +545,16 @@ gradient = 1
 
 
 
-gradient_color_1 = '#3a3a3a'
-gradient_color_2 = '#4d4d4d'
-gradient_color_3 = '#606060'
-gradient_color_4 = '#747474'
-gradient_color_5 = '#888888'
-gradient_color_6 = '#9b9b9b'
-gradient_color_7 = '#aeaeae'
-gradient_color_8 = '#c2c2c2'
+
+
+gradient_color_1 = '#7a594e'
+gradient_color_2 = '#856053'
+gradient_color_3 = '#906658'
+gradient_color_4 = '#9b6c5d'
+gradient_color_5 = '#a67261'
+gradient_color_6 = '#b17865'
+gradient_color_7 = '#bb7d69'
+gradient_color_8 = '#c6836c'
 gradient_color_9 = '#ffffff'
 
 [smoothing]
