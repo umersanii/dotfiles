@@ -228,14 +228,50 @@ Item { // Bar content region
                 GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
             }
 
+            Connections {
+                target: TimerService
+                function onStopwatchRunningChanged() {
+                    if (TimerService.stopwatchRunning) {
+                        rightCenterGroupContent.prefersClock = false;
+                    }
+                }
+            }
+
             BarGroup {
                 id: rightCenterGroupContent
                 anchors.fill: parent
 
-                ClockWidget {
-                    showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
-                    Layout.alignment: Qt.AlignVCenter
+                property bool prefersClock: false
+
+                StackLayout {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    currentIndex: ((TimerService.stopwatchRunning || TimerService.stopwatchTime > 0) && !rightCenterGroupContent.prefersClock) ? 0 : 1
+                    
+                    TimerWidget {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: rightCenterGroupContent.prefersClock = true
+                        }
+                    }
+
+                    ClockWidget {
+                        showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                if (TimerService.stopwatchRunning || TimerService.stopwatchTime > 0) {
+                                    rightCenterGroupContent.prefersClock = false;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 VerticalBarSeparator {
