@@ -22,7 +22,6 @@ Item { // Bar content region
         Layout.bottomMargin: Appearance.sizes.baseBarHeight / 3
         Layout.fillHeight: true
         implicitWidth: 1
-        color: Appearance.colors.colOutlineVariant
     }
 
     // Background shadow
@@ -164,23 +163,95 @@ Item { // Bar content region
                 GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
             }
 
+            Connections {
+                target: TimerService
+                function onStopwatchRunningChanged() {
+                    if (TimerService.stopwatchRunning) {
+                        rightCenterGroupContent.prefersClock = false;
+                    } else if (TimerService.stopwatchTime <= 0) {
+                        rightCenterGroupContent.prefersClock = true;
+                    }
+                }
+
+                function onStopwatchTimeChanged() {
+                    if (!TimerService.stopwatchRunning && TimerService.stopwatchTime <= 0) {
+                        rightCenterGroupContent.prefersClock = true;
+                    }
+                }
+            }
+
             BarGroup {
                 id: rightCenterGroupContent
                 anchors.fill: parent
 
-                ClockWidget {
-                    showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
-                    Layout.alignment: Qt.AlignVCenter
+                property bool prefersClock: true
+                readonly property bool stopwatchActive: TimerService.stopwatchRunning || TimerService.stopwatchTime > 0
+                readonly property bool showClock: !stopwatchActive || prefersClock
+
+                function showClockForFiveSeconds() {
+                    prefersClock = true;
+                    clockOverlayTimeout.restart();
+                }
+
+                property Timer clockOverlayTimeout: Timer {
+                    interval: 5000
+                    repeat: false
+                    onTriggered: rightCenterGroupContent.prefersClock = false
+                }
+
+                Item {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    ClockWidget {
+                        anchors.fill: parent
+                        showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
+                        opacity: rightCenterGroupContent.showClock ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 250 } }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: rightCenterGroupContent.stopwatchActive && rightCenterGroupContent.showClock
+                            onClicked: {
+                                rightCenterGroupContent.prefersClock = false;
+                                rightCenterGroupContent.clockOverlayTimeout.stop();
+                            }
+                        }
+                    }
+
+                    Revealer {
+                        anchors.fill: parent
+                        reveal: rightCenterGroupContent.stopwatchActive
+                        implicitHeight: timerWidget.implicitHeight
+                        implicitWidth: timerWidget.implicitWidth
+
+                        TimerWidget {
+                            id: timerWidget
+                            anchors.fill: parent
+                            opacity: rightCenterGroupContent.showClock ? 0 : 1
+                            Behavior on opacity { NumberAnimation { duration: 250 } }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: rightCenterGroupContent.stopwatchActive && !rightCenterGroupContent.showClock
+                                onClicked: rightCenterGroupContent.showClockForFiveSeconds()
+                            }
+                        }
+                    }
+                }
+
+                VerticalBarSeparator {
+                    visible: Config.options.bar.weather.enable
+                }
+
+                Loader {
+                    Layout.alignment: Qt.AlignVCenter
+                    active: Config.options.bar.weather.enable
+                    sourceComponent: WeatherBar {}
                 }
 
                 UtilButtons {
                     visible: (Config.options.bar.verbose && root.useShortenedForm === 0)
-                    Layout.alignment: Qt.AlignVCenter
-                }
-
-                BatteryIndicator {
-                    visible: (root.useShortenedForm < 2 && Battery.available)
                     Layout.alignment: Qt.AlignVCenter
                 }
             }
@@ -313,10 +384,6 @@ Item { // Bar content region
                         text: BluetoothStatus.connected ? "bluetooth_connected" : BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
                         iconSize: Appearance.font.pixelSize.larger
                         color: rightSidebarButton.colText
-                    }
-                    ClaudeUsage {
-                        Layout.leftMargin: indicatorsRowLayout.realSpacing
-                        Layout.alignment: Qt.AlignVCenter
                     }
                 }
             }
