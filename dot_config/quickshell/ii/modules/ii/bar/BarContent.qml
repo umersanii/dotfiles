@@ -1,7 +1,9 @@
 import qs.modules.ii.bar.weather
 import QtQuick
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 import Quickshell
+import Quickshell.Widgets
 import Quickshell.Services.UPower
 import qs
 import qs.services
@@ -22,6 +24,70 @@ Item { // Bar content region
         Layout.bottomMargin: Appearance.sizes.baseBarHeight / 3
         Layout.fillHeight: true
         implicitWidth: 1
+        color: Appearance.colors.colOutlineVariant
+    }
+
+    component AnimatedBarLogo: Item {
+        id: logoRoot
+        implicitWidth: 28
+        implicitHeight: 28
+        property bool updatesAvailable: Updates.anyUpdates
+        property real glowOpacity: 0
+
+        onUpdatesAvailableChanged: {
+            if (!updatesAvailable) {
+                glowOpacity = 0;
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: Appearance.rounding.full
+            color: updatesAvailable ? ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.15) : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 0.35)
+            border.width: 1
+            border.color: updatesAvailable ? Appearance.colors.colSecondary : Appearance.colors.colLayer0Border
+        }
+
+        MouseArea {
+            id: logoMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            z: 1
+            onPressed: event => event.accepted = true
+            onClicked: {
+                Quickshell.execDetached(["sh", "-c", Config.options.apps.update]);
+            }
+
+            IconImage {
+                id: logoIcon
+                anchors.centerIn: parent
+                width: 18
+                height: 18
+                source: Quickshell.iconPath(SystemInfo.logo)
+            }
+
+            Glow {
+                anchors.fill: logoIcon
+                source: logoIcon
+                radius: 12
+                samples: 25
+                color: Appearance.colors.colSecondary
+                opacity: logoRoot.glowOpacity
+                visible: updatesAvailable
+            }
+
+            StyledToolTip {
+                text: Translation.tr("%1 updates available").arg(Updates.count)
+                extraVisibleCondition: updatesAvailable && logoMouseArea.containsMouse
+            }
+        }
+
+        SequentialAnimation on glowOpacity {
+            loops: Animation.Infinite
+            running: logoRoot.updatesAvailable
+            NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutQuad }
+            NumberAnimation { to: 0.1; duration: 1500; easing.type: Easing.InOutQuad }
+        }
     }
 
     // Background shadow
@@ -88,12 +154,16 @@ Item { // Bar content region
                 colBackground: barLeftSideMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
             }
 
-            ActiveWindow {
+            BarGroup {
+                id: workspacesGroup
                 Layout.leftMargin: 10 + (leftSidebarButton.visible ? 0 : Appearance.rounding.screenRounding)
                 Layout.rightMargin: Appearance.rounding.screenRounding
-                Layout.fillWidth: true
                 Layout.fillHeight: true
-                visible: root.useShortenedForm === 0
+                Workspaces {
+                    id: workspacesWidget
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                }
             }
         }
     }
@@ -110,7 +180,12 @@ Item { // Bar content region
         BarGroup {
             id: leftCenterGroup
             anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: root.centerSideModuleWidth
+            readonly property bool isExpanded: (mediaWidget.isActive || root.useShortenedForm >= 1)
+            implicitWidth: isExpanded ? root.centerSideModuleWidth : calculatedImplicitWidth
+
+            Behavior on implicitWidth {
+                animation: Appearance.animation.elementResize.numberAnimation.createObject(leftCenterGroup)
+            }
 
             Resources {
                 alwaysShowAllResources: root.useShortenedForm === 2
@@ -118,39 +193,29 @@ Item { // Bar content region
             }
 
             Media {
+                id: mediaWidget
                 visible: root.useShortenedForm < 2
-                Layout.fillWidth: true
+                Layout.fillWidth: mediaWidget.isActive
             }
         }
 
         VerticalBarSeparator {
-            visible: Config.options?.bar.borderless
+            visible: true
         }
 
         BarGroup {
             id: middleCenterGroup
             anchors.verticalCenter: parent.verticalCenter
-            padding: workspacesWidget.widgetPadding
-
-            Workspaces {
-                id: workspacesWidget
+            ActiveWindow {
+                id: activeWindowWidget
+                Layout.fillWidth: true
                 Layout.fillHeight: true
-                MouseArea {
-                    // Right-click to toggle overview
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-
-                    onPressed: event => {
-                        if (event.button === Qt.RightButton) {
-                            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
-                        }
-                    }
-                }
+                visible: root.useShortenedForm === 0
             }
         }
 
         VerticalBarSeparator {
-            visible: Config.options?.bar.borderless
+            visible: true
         }
 
         MouseArea {
@@ -168,14 +233,6 @@ Item { // Bar content region
                 function onStopwatchRunningChanged() {
                     if (TimerService.stopwatchRunning) {
                         rightCenterGroupContent.prefersClock = false;
-                    } else if (TimerService.stopwatchTime <= 0) {
-                        rightCenterGroupContent.prefersClock = true;
-                    }
-                }
-
-                function onStopwatchTimeChanged() {
-                    if (!TimerService.stopwatchRunning && TimerService.stopwatchTime <= 0) {
-                        rightCenterGroupContent.prefersClock = true;
                     }
                 }
             }
@@ -184,57 +241,34 @@ Item { // Bar content region
                 id: rightCenterGroupContent
                 anchors.fill: parent
 
-                property bool prefersClock: true
-                readonly property bool stopwatchActive: TimerService.stopwatchRunning || TimerService.stopwatchTime > 0
-                readonly property bool showClock: !stopwatchActive || prefersClock
+                property bool prefersClock: false
 
-                function showClockForFiveSeconds() {
-                    prefersClock = true;
-                    clockOverlayTimeout.restart();
-                }
-
-                property Timer clockOverlayTimeout: Timer {
-                    interval: 5000
-                    repeat: false
-                    onTriggered: rightCenterGroupContent.prefersClock = false
-                }
-
-                Item {
+                StackLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-
-                    ClockWidget {
-                        anchors.fill: parent
-                        showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
-                        opacity: rightCenterGroupContent.showClock ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 250 } }
-
+                    currentIndex: ((TimerService.stopwatchRunning || TimerService.stopwatchTime > 0) && !rightCenterGroupContent.prefersClock) ? 0 : 1
+                    
+                    TimerWidget {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        
                         MouseArea {
                             anchors.fill: parent
-                            enabled: rightCenterGroupContent.stopwatchActive && rightCenterGroupContent.showClock
-                            onClicked: {
-                                rightCenterGroupContent.prefersClock = false;
-                                rightCenterGroupContent.clockOverlayTimeout.stop();
-                            }
+                            onClicked: rightCenterGroupContent.prefersClock = true
                         }
                     }
 
-                    Revealer {
-                        anchors.fill: parent
-                        reveal: rightCenterGroupContent.stopwatchActive
-                        implicitHeight: timerWidget.implicitHeight
-                        implicitWidth: timerWidget.implicitWidth
+                    ClockWidget {
+                        showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
 
-                        TimerWidget {
-                            id: timerWidget
+                        MouseArea {
                             anchors.fill: parent
-                            opacity: rightCenterGroupContent.showClock ? 0 : 1
-                            Behavior on opacity { NumberAnimation { duration: 250 } }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: rightCenterGroupContent.stopwatchActive && !rightCenterGroupContent.showClock
-                                onClicked: rightCenterGroupContent.showClockForFiveSeconds()
+                            onClicked: {
+                                if (TimerService.stopwatchRunning || TimerService.stopwatchTime > 0) {
+                                    rightCenterGroupContent.prefersClock = false;
+                                }
                             }
                         }
                     }
@@ -244,6 +278,7 @@ Item { // Bar content region
                     visible: Config.options.bar.weather.enable
                 }
 
+                // Weather (Moved next to Clock)
                 Loader {
                     Layout.alignment: Qt.AlignVCenter
                     active: Config.options.bar.weather.enable
@@ -295,15 +330,20 @@ Item { // Bar content region
             spacing: 5
             layoutDirection: Qt.RightToLeft
 
+            AnimatedBarLogo {
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                Layout.rightMargin: Appearance.rounding.screenRounding
+            }
+
             RippleButton { // Right sidebar button
                 id: rightSidebarButton
 
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                Layout.rightMargin: Appearance.rounding.screenRounding
+                Layout.rightMargin: 0
                 Layout.fillWidth: false
 
-                implicitWidth: indicatorsRowLayout.implicitWidth + 10 * 2
-                implicitHeight: indicatorsRowLayout.implicitHeight + 5 * 2
+                implicitWidth: indicatorsRowLayout.implicitWidth + 12 * 2
+                implicitHeight: indicatorsRowLayout.implicitHeight + 6 * 2
 
                 buttonRadius: Appearance.rounding.full
                 colBackground: barRightSideMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
@@ -326,16 +366,11 @@ Item { // Bar content region
                 RowLayout {
                     id: indicatorsRowLayout
                     anchors.centerIn: parent
-                    property real realSpacing: 15
-                    spacing: 0
+                    spacing: 12
 
                     Revealer {
                         reveal: Audio.sink?.audio?.muted ?? false
                         Layout.fillHeight: true
-                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                        Behavior on Layout.rightMargin {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-                        }
                         MaterialSymbol {
                             text: "volume_off"
                             iconSize: Appearance.font.pixelSize.larger
@@ -345,10 +380,6 @@ Item { // Bar content region
                     Revealer {
                         reveal: Audio.source?.audio?.muted ?? false
                         Layout.fillHeight: true
-                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                        Behavior on Layout.rightMargin {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-                        }
                         MaterialSymbol {
                             text: "mic_off"
                             iconSize: Appearance.font.pixelSize.larger
@@ -357,18 +388,11 @@ Item { // Bar content region
                     }
                     HyprlandXkbIndicator {
                         Layout.alignment: Qt.AlignVCenter
-                        Layout.rightMargin: indicatorsRowLayout.realSpacing
                         color: rightSidebarButton.colText
                     }
                     Revealer {
                         reveal: Notifications.silent || Notifications.unread > 0
                         Layout.fillHeight: true
-                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                        implicitHeight: reveal ? notificationUnreadCount.implicitHeight : 0
-                        implicitWidth: reveal ? notificationUnreadCount.implicitWidth : 0
-                        Behavior on Layout.rightMargin {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-                        }
                         NotificationUnreadCount {
                             id: notificationUnreadCount
                         }
@@ -379,12 +403,21 @@ Item { // Bar content region
                         color: rightSidebarButton.colText
                     }
                     MaterialSymbol {
-                        Layout.leftMargin: indicatorsRowLayout.realSpacing
                         visible: BluetoothStatus.available
                         text: BluetoothStatus.connected ? "bluetooth_connected" : BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
                         iconSize: Appearance.font.pixelSize.larger
                         color: rightSidebarButton.colText
                     }
+                }
+            }
+
+            // Battery (Moved to far right and wrapped in BarGroup)
+            BarGroup {
+                visible: (root.useShortenedForm < 2 && Battery.available)
+                Layout.alignment: Qt.AlignVCenter
+                Layout.leftMargin: 4
+                BatteryIndicator {
+                    Layout.alignment: Qt.AlignVCenter
                 }
             }
 
@@ -398,16 +431,6 @@ Item { // Bar content region
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-            }
-
-            // Weather
-            Loader {
-                Layout.leftMargin: 4
-                active: Config.options.bar.weather.enable
-
-                sourceComponent: BarGroup {
-                    WeatherBar {}
-                }
             }
         }
     }
