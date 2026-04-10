@@ -20,19 +20,48 @@ Item {
         spacing: 4
         anchors.centerIn: parent
 
-        Resource {
+        MouseArea {
+            id: aiUsageHover
             Layout.alignment: Qt.AlignVCenter
-            iconName: "schedule"
-            percentage: ClaudeUsage.fiveHourUsedPercentage
-            warningThreshold: 80
-        }
+            implicitWidth: aiUsageRow.implicitWidth
+            implicitHeight: aiUsageRow.implicitHeight
+            hoverEnabled: true
+            acceptedButtons: Qt.NoButton
 
-        Resource {
-            Layout.alignment: Qt.AlignVCenter
-            Layout.leftMargin: 3
-            iconName: "date_range"
-            percentage: ClaudeUsage.sevenDayUsedPercentage
-            warningThreshold: 80
+            RowLayout {
+                id: aiUsageRow
+                spacing: 0
+
+                Resource {
+                    Layout.alignment: Qt.AlignVCenter
+                    iconName: ""
+                    iconSource: Quickshell.shellPath("assets/icons/claude-symbolic.svg")
+                    percentage: ClaudeUsage.fiveHourUsedPercentage
+                    warningThreshold: 80
+                }
+
+                Resource {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 3
+                    iconName: ""
+                    iconSource: Quickshell.shellPath("assets/icons/claude-symbolic.svg")
+                    percentage: ClaudeUsage.sevenDayUsedPercentage
+                    warningThreshold: 80
+                }
+
+                Resource {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 3
+                    iconName: ""
+                    iconSource: Quickshell.shellPath("assets/icons/copilot-symbolic.svg")
+                    percentage: CopilotUsage.premiumUsedPercentage
+                    warningThreshold: 80
+                }
+            }
+
+            ClaudeUsagePopup {
+                hoverTarget: aiUsageHover
+            }
         }
 
         Loader {
