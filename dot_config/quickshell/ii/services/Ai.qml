@@ -294,6 +294,32 @@ Singleton {
             "key_get_description": Translation.tr("**Instructions**: Log into Mistral account, go to Keys on the sidebar, click Create new key"),
             "api_format": "mistral",
         }),
+        "llama-3.3-70b": aiModelComponent.createObject(this, {
+            "name": "Llama 3.3 70B (Groq)",
+            "icon": "spark-symbolic",
+            "description": Translation.tr("Online | Groq | Ultra-fast LPU inference"),
+            "homepage": "https://groq.com",
+            "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+            "model": "llama-3.3-70b-versatile",
+            "requires_key": true,
+            "key_id": "groq",
+            "key_get_link": "https://console.groq.com/keys",
+            "key_get_description": Translation.tr("**Instructions**: Log into Groq Rocket Console, go to API Keys, and create a new key."),
+            "api_format": "openai",
+        }),
+        "llama-3.1-8b": aiModelComponent.createObject(this, {
+            "name": "Llama 3.1 8B (Groq)",
+            "icon": "spark-symbolic",
+            "description": Translation.tr("Online | Groq | Fast 8B model"),
+            "homepage": "https://groq.com",
+            "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+            "model": "llama-3.1-8b-instant",
+            "requires_key": true,
+            "key_id": "groq",
+            "key_get_link": "https://console.groq.com/keys",
+            "key_get_description": Translation.tr("**Instructions**: Log into Groq Rocket Console, go to API Keys, and create a new key."),
+            "api_format": "openai",
+        }),
     }
     property var modelList: Object.keys(root.models)
     property var currentModelId: Persistent.states?.ai?.model || modelList[0]
@@ -327,6 +353,7 @@ Singleton {
         if (model.includes("llama")) return "ollama-symbolic";
         if (model.includes("gemma")) return "google-gemini-symbolic";
         if (model.includes("deepseek")) return "deepseek-symbolic";
+        if (model.includes("groq")) return "spark-symbolic";
         if (/^phi\d*:/i.test(model)) return "microsoft-symbolic";
         return "ollama-symbolic";
     }
