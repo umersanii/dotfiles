@@ -692,14 +692,15 @@ gradient = 1
 
 
 
-gradient_color_1 = '#7a346a'
-gradient_color_2 = '#853672'
-gradient_color_3 = '#90377b'
-gradient_color_4 = '#9b3884'
-gradient_color_5 = '#a6398c'
-gradient_color_6 = '#b13994'
-gradient_color_7 = '#bb389d'
-gradient_color_8 = '#c637a5'
+
+gradient_color_1 = '#6e537a'
+gradient_color_2 = '#775985'
+gradient_color_3 = '#815f90'
+gradient_color_4 = '#8a649b'
+gradient_color_5 = '#9369a6'
+gradient_color_6 = '#9c6eb1'
+gradient_color_7 = '#a572bb'
+gradient_color_8 = '#ae76c6'
 gradient_color_9 = '#ffffff'
 
 [smoothing]
