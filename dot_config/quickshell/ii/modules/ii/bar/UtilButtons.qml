@@ -6,7 +6,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Services.Pipewire
-import Quickshell.Services.UPower
 import qs.services
 
 Item {
@@ -21,36 +20,19 @@ Item {
         spacing: 4
         anchors.centerIn: parent
 
-        Loader {
-            active: Config.options.bar.utilButtons.showScreenSnip
-            visible: Config.options.bar.utilButtons.showScreenSnip
-            sourceComponent: CircleUtilButton {
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "screenshot"]);
-                MaterialSymbol {
-                    horizontalAlignment: Qt.AlignHCenter
-                    fill: 1
-                    text: "screenshot_region"
-                    iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer2
-                }
-            }
+        Resource {
+            Layout.alignment: Qt.AlignVCenter
+            iconName: "schedule"
+            percentage: ClaudeUsage.fiveHourUsedPercentage
+            warningThreshold: 80
         }
 
-        Loader {
-            active: Config.options.bar.utilButtons.showScreenRecord
-            visible: Config.options.bar.utilButtons.showScreenRecord
-            sourceComponent: CircleUtilButton {
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached([Directories.recordScriptPath])
-                MaterialSymbol {
-                    horizontalAlignment: Qt.AlignHCenter
-                    fill: 1
-                    text: "videocam"
-                    iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer2
-                }
-            }
+        Resource {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: 3
+            iconName: "date_range"
+            percentage: ClaudeUsage.sevenDayUsedPercentage
+            warningThreshold: 80
         }
 
         Loader {
@@ -123,37 +105,6 @@ Item {
             }
         }
 
-        Loader {
-            active: Config.options.bar.utilButtons.showPerformanceProfileToggle
-            visible: Config.options.bar.utilButtons.showPerformanceProfileToggle
-            sourceComponent: CircleUtilButton {
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: event => {
-                    if (PowerProfiles.hasPerformanceProfile) {
-                        switch(PowerProfiles.profile) {
-                            case PowerProfile.PowerSaver: PowerProfiles.profile = PowerProfile.Balanced
-                            break;
-                            case PowerProfile.Balanced: PowerProfiles.profile = PowerProfile.Performance
-                            break;
-                            case PowerProfile.Performance: PowerProfiles.profile = PowerProfile.PowerSaver
-                            break;
-                        }
-                    } else {
-                        PowerProfiles.profile = PowerProfiles.profile == PowerProfile.Balanced ? PowerProfile.PowerSaver : PowerProfile.Balanced
-                    }
-                }
-                MaterialSymbol {
-                    horizontalAlignment: Qt.AlignHCenter
-                    fill: 0
-                    text: switch(PowerProfiles.profile) {
-                        case PowerProfile.PowerSaver: return "energy_savings_leaf"
-                        case PowerProfile.Balanced: return "airwave"
-                        case PowerProfile.Performance: return "local_fire_department"
-                    }
-                    iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer2
-                }
-            }
-        }
+
     }
 }
