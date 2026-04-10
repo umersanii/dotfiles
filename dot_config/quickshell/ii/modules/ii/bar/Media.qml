@@ -56,6 +56,25 @@ Item {
         onTriggered: root.showingTitle = false
     }
 
+    function showTitle() {
+        if (root.activePlayer?.playbackState === MprisPlaybackState.Playing) {
+            root.showingTitle = true
+            titleTimer.restart()
+        }
+    }
+
+    Component.onCompleted: showTitle()
+    onActivePlayerChanged: showTitle()
+
+    Connections {
+        target: root.activePlayer
+        ignoreUnknownSignals: true
+
+        function onPlaybackStateChanged() { showTitle() }
+        function onTrackTitleChanged() { showTitle() }
+        function onTrackArtistChanged() { showTitle() }
+    }
+
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton | Qt.RightButton | Qt.LeftButton
