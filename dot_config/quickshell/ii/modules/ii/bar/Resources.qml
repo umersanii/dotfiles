@@ -23,18 +23,16 @@ MouseArea {
             iconName: "memory"
             percentage: ResourceUsage.memoryUsedPercentage
             warningThreshold: Config.options.bar.resources.memoryWarningThreshold
-            customColor: percentage >= 0.85 ? Appearance.colors.colError : (percentage >= 0.70 ? "#FBBC04" : null)
         }
 
         Resource {
             iconName: "planner_review"
             percentage: ResourceUsage.cpuUsage
-            shown: Config.options.bar.resources.alwaysShowCpu || 
+            shown: Config.options.bar.resources.alwaysShowCpu ||
                 !(MprisController.activePlayer?.trackTitle?.length > 0) ||
                 root.alwaysShowAllResources
             Layout.leftMargin: shown ? 3 : 0
             warningThreshold: Config.options.bar.resources.cpuWarningThreshold
-            customColor: percentage >= 0.85 ? Appearance.colors.colError : (percentage >= 0.70 ? "#FBBC04" : null)
         }
 
         Resource {
@@ -43,7 +41,6 @@ MouseArea {
             shown: true
             Layout.leftMargin: 3
             warningThreshold: Config.options.bar.resources.cpuWarningThreshold
-            customColor: percentage >= 0.85 ? Appearance.colors.colError : (percentage >= 0.70 ? "#FBBC04" : null)
         }
 
         Resource {
@@ -53,7 +50,6 @@ MouseArea {
                 root.alwaysShowAllResources
             Layout.leftMargin: shown ? 3 : 0
             warningThreshold: Config.options.bar.resources.cpuWarningThreshold
-            customColor: percentage >= 0.8 ? "#22C55E" : null
         }
 
     }
