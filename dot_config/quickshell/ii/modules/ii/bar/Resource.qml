@@ -12,15 +12,31 @@ Item {
     property var customColor: null
     clip: true
     visible: width > 0 && height > 0
-    implicitWidth: resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth
+    implicitWidth: resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth + 8
     implicitHeight: Appearance.sizes.barHeight
     property bool warning: percentage * 100 >= warningThreshold
-    readonly property color colActive: customColor !== null ? customColor : (root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer)
+    readonly property color colActive: {
+        let p = percentage * 100;
+        let r, g, b;
+        if (p < 25) {
+            r = 0x22/255; g = 0xC5/255; b = 0x5E/255;  // green
+        } else if (p < 50) {
+            r = 0xFB/255; g = 0xBC/255; b = 0x04/255;  // yellow
+        } else if (p < 75) {
+            r = 0xF9/255; g = 0x73/255; b = 0x16/255;  // orange
+        } else {
+            r = 0xEF/255; g = 0x44/255; b = 0x44/255;  // red
+        }
+        let levelMin = Math.floor(p / 25) * 25;
+        let t = Math.max(0.1, (p - levelMin) / 25);
+        // Mix toward white at low usage, pure color at high usage
+        return Qt.rgba(1 - t * (1 - r), 1 - t * (1 - g), 1 - t * (1 - b), 1.0);
+    }
 
     RowLayout {
         id: resourceRowLayout
         spacing: 2
-        x: shown ? 0 : -resourceRowLayout.width
+        x: shown ? 4 : -(resourceRowLayout.width + 4)
         anchors {
             verticalCenter: parent.verticalCenter
         }
@@ -51,26 +67,6 @@ Item {
                     renderType: Text.QtRendering
                     color: "black"
                 }
-            }
-        }
-
-        Item {
-            Layout.alignment: Qt.AlignVCenter
-            implicitWidth: fullPercentageTextMetrics.width
-            implicitHeight: percentageText.implicitHeight
-
-            TextMetrics {
-                id: fullPercentageTextMetrics
-                text: "100"
-                font.pixelSize: Appearance.font.pixelSize.small
-            }
-
-            StyledText {
-                id: percentageText
-                anchors.centerIn: parent
-                color: Appearance.colors.colOnLayer1
-                font.pixelSize: Appearance.font.pixelSize.small
-                text: `${Math.round(percentage * 100).toString()}`
             }
         }
 
