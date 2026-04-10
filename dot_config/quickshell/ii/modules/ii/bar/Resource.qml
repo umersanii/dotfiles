@@ -6,6 +6,7 @@ import QtQuick.Layouts
 Item {
     id: root
     required property string iconName
+    property string iconSource: ""
     required property double percentage
     property int warningThreshold: 100
     property bool shown: true
@@ -57,15 +58,34 @@ Item {
                 width: resourceCircProg.implicitSize
                 height: resourceCircProg.implicitSize
                 
-                MaterialSymbol {
+                Loader {
                     anchors.centerIn: parent
-                    font.weight: Font.DemiBold
-                    fill: 1
-                    text: iconName
-                    iconSize: Appearance.font.pixelSize.normal
-                    antialiasing: true
-                    renderType: Text.QtRendering
-                    color: "black"
+                    sourceComponent: root.iconSource !== "" ? imgIcon : symIcon
+                }
+                Component {
+                    id: symIcon
+                    MaterialSymbol {
+                        font.weight: Font.DemiBold
+                        fill: 1
+                        text: iconName
+                        iconSize: Appearance.font.pixelSize.normal
+                        antialiasing: true
+                        renderType: Text.QtRendering
+                        color: "black"
+                    }
+                }
+                Component {
+                    id: imgIcon
+                    Image {
+                        width: Appearance.font.pixelSize.normal
+                        height: Appearance.font.pixelSize.normal
+                        source: root.iconSource
+                        sourceSize.width: Appearance.font.pixelSize.normal
+                        sourceSize.height: Appearance.font.pixelSize.normal
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        antialiasing: true
+                    }
                 }
             }
         }
