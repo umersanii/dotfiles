@@ -5,6 +5,7 @@ import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.UPower
+import Quickshell.Services.Notifications
 import qs
 import qs.services
 import qs.modules.common
@@ -18,6 +19,8 @@ Item { // Bar content region
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
     property real useShortenedForm: (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
     readonly property int centerSideModuleWidth: (useShortenedForm == 2) ? Appearance.sizes.barCenterSideModuleWidthHellaShortened : (useShortenedForm == 1) ? Appearance.sizes.barCenterSideModuleWidthShortened : Appearance.sizes.barCenterSideModuleWidth
+
+    readonly property bool notifVisible: Notifications.popupList.length > 0 && !GlobalStates.screenLocked
 
     component VerticalBarSeparator: Rectangle {
         Layout.topMargin: Appearance.sizes.baseBarHeight / 3
@@ -123,6 +126,8 @@ Item { // Bar content region
         }
         implicitWidth: leftSectionRowLayout.implicitWidth
         implicitHeight: Appearance.sizes.baseBarHeight
+        opacity: root.notifVisible ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type } }
 
         onScrollDown: root.brightnessMonitor.setBrightness(root.brightnessMonitor.brightness - 0.05)
         onScrollUp: root.brightnessMonitor.setBrightness(root.brightnessMonitor.brightness + 0.05)
@@ -176,6 +181,8 @@ Item { // Bar content region
             horizontalCenter: parent.horizontalCenter
         }
         spacing: 4
+        opacity: root.notifVisible ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type } }
 
         BarGroup {
             id: leftCenterGroup
@@ -304,6 +311,8 @@ Item { // Bar content region
         }
         implicitWidth: rightSectionRowLayout.implicitWidth
         implicitHeight: Appearance.sizes.baseBarHeight
+        opacity: root.notifVisible ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type } }
 
         onScrollDown: Audio.decrementVolume();
         onScrollUp: Audio.incrementVolume();
@@ -431,6 +440,117 @@ Item { // Bar content region
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+            }
+        }
+    }
+
+    // Notification overlay — replaces the whole bar when popups are active
+    Item {
+        id: notifOverlay
+        anchors.fill: parent
+        opacity: root.notifVisible ? 1 : 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Appearance.animation.elementMoveFast.duration
+                easing.type: Appearance.animation.elementMoveFast.type
+            }
+        }
+
+        property var firstGroup: Notifications.popupAppNameList.length > 0
+            ? Notifications.popupGroupsByAppName[Notifications.popupAppNameList[0]]
+            : null
+        property var firstNotif: notifOverlay.firstGroup?.notifications[
+            (notifOverlay.firstGroup?.notifications.length ?? 1) - 1
+        ] ?? null
+        property int extraCount: Math.max(0, Notifications.popupList.length - 1)
+
+        // Inverted background — flat rectangle matching the hug bar shape
+        Rectangle {
+            anchors.fill: parent
+            radius: 0
+            color: Appearance.colors.colOnLayer0
+        }
+
+        // Dismiss + count pinned to the right edge
+        RowLayout {
+            anchors.right: parent.right
+            anchors.rightMargin: Appearance.rounding.screenRounding + 8
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 6
+
+            Revealer {
+                reveal: notifOverlay.extraCount > 0
+                StyledText {
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: ColorUtils.transparentize(Appearance.colors.colLayer0Base, 0.35)
+                    text: `+${notifOverlay.extraCount}`
+                }
+            }
+
+            RippleButton {
+                implicitWidth: 22
+                implicitHeight: 22
+                buttonRadius: Appearance.rounding.full
+                colBackground: "transparent"
+                colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colLayer0Base, 0.85)
+                colRipple: ColorUtils.transparentize(Appearance.colors.colLayer0Base, 0.75)
+                onClicked: {
+                    Notifications.popupList.forEach(n => {
+                        Notifications.discardNotification(n.notificationId);
+                    });
+                }
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: "close"
+                    iconSize: Appearance.font.pixelSize.normal
+                    color: Appearance.colors.colLayer0Base
+                }
+            }
+        }
+
+        // Centered content: icon + two-line text (mirrors active window layout)
+        Item {
+            anchors.fill: parent
+            anchors.leftMargin: 50
+            anchors.rightMargin: 50
+
+            RowLayout {
+                anchors.centerIn: parent
+                spacing: 8
+
+                NotificationAppIcon {
+                    Layout.alignment: Qt.AlignVCenter
+                    implicitSize: 20
+                    image: notifOverlay.firstNotif?.image ?? ""
+                    appIcon: notifOverlay.firstGroup?.appIcon ?? ""
+                    summary: notifOverlay.firstNotif?.summary ?? ""
+                    urgency: notifOverlay.firstNotif?.urgency ?? NotificationUrgency.Normal
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: -4
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0Base, 0.35)
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                        text: notifOverlay.firstNotif?.appName ?? notifOverlay.firstGroup?.appName ?? ""
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: Appearance.colors.colLayer0Base
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                        text: notifOverlay.firstNotif?.summary ?? ""
+                    }
+                }
             }
         }
     }
