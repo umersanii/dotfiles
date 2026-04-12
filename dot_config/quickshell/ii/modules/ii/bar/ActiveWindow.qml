@@ -29,14 +29,16 @@ Item {
         return pending[Math.floor(Math.random() * pending.length)]
     }
 
+    function showNextTodo() {
+        root.activeTodo = root.pickRandomTodo()
+        if (root.activeTodo) root.todoVisible = true
+    }
+
     Timer {
         interval: 800
         running: true
         repeat: false
-        onTriggered: {
-            root.activeTodo = root.pickRandomTodo()
-            if (root.activeTodo) root.todoVisible = true
-        }
+        onTriggered: root.showNextTodo()
     }
 
     Timer {
@@ -44,7 +46,18 @@ Item {
         interval: 20000
         running: root.todoVisible
         repeat: false
-        onTriggered: root.todoVisible = false
+        onTriggered: {
+            root.todoVisible = false
+            // Schedule next todo in 20–40 minutes (avg ~30 min = ~2/hour)
+            scheduleTimer.interval = 1200000 + Math.floor(Math.random() * 1200000)
+            scheduleTimer.restart()
+        }
+    }
+
+    Timer {
+        id: scheduleTimer
+        repeat: false
+        onTriggered: root.showNextTodo()
     }
 
     // Inverted background pill — fades in with the todo
