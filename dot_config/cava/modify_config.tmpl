@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+import sys
+import re
+
+current = sys.stdin.read()
+
+# Extract gradient_color values from the current deployed file
+colors = {}
+for line in current.splitlines():
+    m = re.match(r"^(gradient_color_\d+)\s*=\s*'(#[0-9a-fA-F]+)'", line)
+    if m:
+        colors[m.group(1)] = m.group(2)
+
+base = '''{{ include (joinPath .chezmoi.sourceDir ".chezmoitemplates" "cava_config") -}}
+'''
+
+result = []
+for line in base.splitlines():
+    m = re.match(r"^(gradient_color_\d+)\s*=", line)
+    if m and m.group(1) in colors:
+        result.append(f"{m.group(1)} = '{colors[m.group(1)]}'")
+    else:
+        result.append(line.rstrip())
+
+sys.stdout.write('\n'.join(result) + '\n')
