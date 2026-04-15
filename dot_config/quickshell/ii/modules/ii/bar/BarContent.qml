@@ -35,10 +35,11 @@ Item { // Bar content region
         implicitWidth: 28
         implicitHeight: 28
         property bool updatesAvailable: Updates.anyUpdates
+        property bool shouldAnimate: Updates.shouldAnimate
         property real glowOpacity: 0
 
-        onUpdatesAvailableChanged: {
-            if (!updatesAvailable) {
+        onShouldAnimateChanged: {
+            if (!shouldAnimate) {
                 glowOpacity = 0;
             }
         }
@@ -46,9 +47,9 @@ Item { // Bar content region
         Rectangle {
             anchors.fill: parent
             radius: Appearance.rounding.full
-            color: updatesAvailable ? ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.15) : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 0.35)
+            color: updatesAvailable ? ColorUtils.transparentize("#888888", 0.3) : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 0.35)
             border.width: 1
-            border.color: updatesAvailable ? Appearance.colors.colSecondary : Appearance.colors.colLayer0Border
+            border.color: updatesAvailable ? "#aaaaaa" : Appearance.colors.colLayer0Border
         }
 
         MouseArea {
@@ -67,6 +68,10 @@ Item { // Bar content region
                 width: 18
                 height: 18
                 source: Quickshell.iconPath(SystemInfo.logo)
+                layer.enabled: true
+                layer.effect: ColorOverlay {
+                    color: "white"
+                }
             }
 
             Glow {
@@ -74,7 +79,7 @@ Item { // Bar content region
                 source: logoIcon
                 radius: 12
                 samples: 25
-                color: Appearance.colors.colSecondary
+                color: "white"
                 opacity: logoRoot.glowOpacity
                 visible: updatesAvailable
             }
@@ -87,7 +92,7 @@ Item { // Bar content region
 
         SequentialAnimation on glowOpacity {
             loops: Animation.Infinite
-            running: logoRoot.updatesAvailable
+            running: logoRoot.shouldAnimate
             NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutQuad }
             NumberAnimation { to: 0.1; duration: 1500; easing.type: Easing.InOutQuad }
         }
