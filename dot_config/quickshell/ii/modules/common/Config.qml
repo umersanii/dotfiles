@@ -280,6 +280,13 @@ Singleton {
                     property bool useUSCS: false // Instead of metric (SI) units
                     property int fetchInterval: 10 // minutes
                 }
+                property JsonObject prayerTimes: JsonObject {
+                    property bool enable: false
+                    property real latitude: 33.6844   // Default: Islamabad
+                    property real longitude: 73.0479
+                    property int method: 1            // 1: Univ. of Islamic Sciences, Karachi
+                    property int fetchInterval: 60    // minutes
+                }
                 property JsonObject indicators: JsonObject {
                     property JsonObject notifications: JsonObject {
                         property bool showUnreadCount: false
