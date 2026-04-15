@@ -23,6 +23,10 @@ Singleton {
     }
 
     function addTask(desc) {
+        const active = list.filter(t => !t.done).length
+        if (active >= 8) {
+            root.list = list.filter(t => !t.done)
+        }
         const item = {
             "content": desc,
             "done": false,
@@ -30,9 +34,18 @@ Singleton {
         addItem(item)
     }
 
+    function purgeStaleDone() {
+        const twoDaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000
+        const before = list.length
+        root.list = list.filter(t => !t.done || (t.doneAt && t.doneAt > twoDaysAgo))
+        if (root.list.length !== before)
+            todoFileView.setText(JSON.stringify(root.list))
+    }
+
     function markDone(index) {
         if (index >= 0 && index < list.length) {
             list[index].done = true
+            list[index].doneAt = Date.now()
             // Reassign to trigger onListChanged
             root.list = list.slice(0)
             todoFileView.setText(JSON.stringify(root.list))
@@ -65,6 +78,13 @@ Singleton {
         refresh()
     }
 
+    Timer {
+        interval: 60 * 60 * 1000 // every hour
+        repeat: true
+        running: true
+        onTriggered: root.purgeStaleDone()
+    }
+
     FileView {
         id: todoFileView
         path: Qt.resolvedUrl(root.filePath)
@@ -72,6 +92,7 @@ Singleton {
             const fileContents = todoFileView.text()
             root.list = JSON.parse(fileContents)
             console.log("[To Do] File loaded")
+            root.purgeStaleDone()
         }
         onLoadFailed: (error) => {
             if(error == FileViewError.FileNotFound) {
