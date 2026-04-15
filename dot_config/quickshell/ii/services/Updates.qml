@@ -15,10 +15,13 @@ Singleton {
     property bool available: false
     property alias checking: checkUpdatesProc.running
     property int count: 0
-    
+    property int lastUpdateTimestamp: 0
+
     readonly property bool anyUpdates: available && count > 0
     readonly property bool updateAdvised: available && count > Config.options.updates.adviseUpdateThreshold
     readonly property bool updateStronglyAdvised: available && count > Config.options.updates.stronglyAdviseUpdateThreshold
+    readonly property int daysSinceLastUpdate: lastUpdateTimestamp > 0 ? Math.floor((Date.now() / 1000 - lastUpdateTimestamp) / 86400) : 0
+    readonly property bool shouldAnimate: anyUpdates && (daysSinceLastUpdate >= 14 || count > 50)
 
     function load() {}
     function refresh() {
@@ -34,6 +37,17 @@ Singleton {
         onTriggered: {
             print("[Updates] Periodic update check due")
             root.refresh();
+        }
+    }
+
+    Process {
+        id: checkLastUpdateProc
+        running: true
+        command: ["bash", "-c", "stat -c %Y /var/lib/pacman/local"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.lastUpdateTimestamp = parseInt(text.trim());
+            }
         }
     }
 
