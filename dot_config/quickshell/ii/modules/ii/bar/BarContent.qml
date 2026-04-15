@@ -68,10 +68,12 @@ Item { // Bar content region
                 width: 18
                 height: 18
                 source: Quickshell.iconPath(SystemInfo.logo)
-                layer.enabled: true
-                layer.effect: ColorOverlay {
-                    color: "white"
-                }
+            }
+
+            ColorOverlay {
+                anchors.fill: logoIcon
+                source: logoIcon
+                color: "white"
             }
 
             Glow {
