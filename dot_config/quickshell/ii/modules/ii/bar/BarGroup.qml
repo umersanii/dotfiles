@@ -5,6 +5,7 @@ import QtQuick.Layouts
 Item {
     id: root
     property bool vertical: false
+    property bool showBackground: true
     property real padding: 5
     implicitWidth: vertical ? Appearance.sizes.baseVerticalBarWidth : (gridLayout.implicitWidth + padding * 2)
     implicitHeight: vertical ? (gridLayout.implicitHeight + padding * 2) : Appearance.sizes.baseBarHeight
@@ -13,6 +14,7 @@ Item {
 
     Rectangle {
         id: background
+        visible: root.showBackground
         anchors {
             fill: parent
             topMargin: root.vertical ? 0 : 4

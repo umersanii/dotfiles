@@ -221,6 +221,7 @@ Item { // Bar content region
 
         BarGroup {
             id: middleCenterGroup
+            showBackground: false
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             ActiveWindow {
