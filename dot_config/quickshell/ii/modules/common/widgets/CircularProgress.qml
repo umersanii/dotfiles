@@ -28,17 +28,27 @@ Item {
 
     onValueChanged: { degree = value * 360 }
 
+    Behavior on degree {
+        enabled: root.enableAnimation
+        NumberAnimation {
+            duration: root.animationDuration
+            easing.type: root.easingType
+        }
+    }
+
     Rectangle {
         id: bgCircle
         visible: root.fill
         anchors.fill: parent
         radius: width / 2
         color: root.colSecondary
+        antialiasing: true
     }
 
     Shape {
         anchors.fill: parent
-        visible: false // HIDE SHAPE FOR TESTING
+        visible: true
+        preferredRendererType: Shape.CurveRenderer
         ShapePath {
             strokeColor: root.colSecondary
             strokeWidth: root.lineWidth
