@@ -55,8 +55,8 @@ Item {
 
             Item {
                 anchors.centerIn: parent
-                width: resourceCircProg.implicitSize
-                height: resourceCircProg.implicitSize
+                width: resourceCircProg.implicitSize - resourceCircProg.lineWidth * 2 - 6
+                height: resourceCircProg.implicitSize - resourceCircProg.lineWidth * 2 - 6
                 
                 Loader {
                     anchors.centerIn: parent
