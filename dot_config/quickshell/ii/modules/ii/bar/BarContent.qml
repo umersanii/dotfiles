@@ -122,7 +122,7 @@ Item { // Bar content region
             top: parent.top
             bottom: parent.bottom
             left: parent.left
-            right: middleSection.left
+            right: leftCenterGroup.left
         }
         implicitWidth: leftSectionRowLayout.implicitWidth
         implicitHeight: Appearance.sizes.baseBarHeight
@@ -170,22 +170,25 @@ Item { // Bar content region
                     Layout.fillWidth: true
                 }
             }
+
         }
     }
 
-    Row { // Middle section
+    Item { // Middle section
         id: middleSection
         anchors {
             top: parent.top
             bottom: parent.bottom
-            horizontalCenter: parent.horizontalCenter
+            left: parent.left
+            right: parent.right
         }
-        spacing: 4
         opacity: root.notifVisible ? 0 : 1
         Behavior on opacity { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type } }
 
         BarGroup {
             id: leftCenterGroup
+            anchors.right: leftSeparator.left
+            anchors.rightMargin: 4
             anchors.verticalCenter: parent.verticalCenter
             readonly property bool isExpanded: (mediaWidget.isActive || root.useShortenedForm >= 1)
             implicitWidth: isExpanded ? root.centerSideModuleWidth : calculatedImplicitWidth
@@ -206,12 +209,19 @@ Item { // Bar content region
             }
         }
 
-        VerticalBarSeparator {
-            visible: true
+        Rectangle {
+            id: leftSeparator
+            anchors.right: middleCenterGroup.left
+            anchors.rightMargin: 4
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height - Appearance.sizes.baseBarHeight / 3 * 2
+            width: 1
+            color: Appearance.colors.colOutlineVariant
         }
 
         BarGroup {
             id: middleCenterGroup
+            anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             ActiveWindow {
                 id: activeWindowWidget
@@ -221,12 +231,20 @@ Item { // Bar content region
             }
         }
 
-        VerticalBarSeparator {
-            visible: true
+        Rectangle {
+            id: rightSeparator
+            anchors.left: middleCenterGroup.right
+            anchors.leftMargin: 4
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height - Appearance.sizes.baseBarHeight / 3 * 2
+            width: 1
+            color: Appearance.colors.colOutlineVariant
         }
 
         MouseArea {
             id: rightCenterGroup
+            anchors.left: rightSeparator.right
+            anchors.leftMargin: 4
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: root.centerSideModuleWidth
             implicitHeight: rightCenterGroupContent.implicitHeight
@@ -282,15 +300,56 @@ Item { // Bar content region
                 }
 
                 VerticalBarSeparator {
-                    visible: Config.options.bar.weather.enable
+                    visible: Config.options.bar.weather.enable || Config.options.bar.prayerTimes.enable
                 }
 
-                // Weather (Moved next to Clock)
-                Loader {
+                // Weather / Prayer Times — cycling
+                Item {
+                    id: weatherPrayerCycler
+                    readonly property bool showWeather: Config.options.bar.weather.enable
+                    readonly property bool showPrayer: Config.options.bar.prayerTimes.enable
+                    readonly property bool bothActive: showWeather && showPrayer
+                    property bool showingWeather: showWeather
+
+                    visible: showWeather || showPrayer
                     Layout.alignment: Qt.AlignVCenter
-                    active: Config.options.bar.weather.enable
-                    sourceComponent: WeatherBar {}
+                    implicitWidth: cyclerStack.implicitWidth
+                    implicitHeight: cyclerStack.implicitHeight
+
+                    Timer {
+                        id: cycleTimer
+                        interval: 30000
+                        running: weatherPrayerCycler.bothActive
+                        repeat: true
+                        onTriggered: weatherPrayerCycler.showingWeather = !weatherPrayerCycler.showingWeather
+                    }
+
+                    function cycle() {
+                        showingWeather = !showingWeather;
+                        cycleTimer.restart();
+                    }
+
+                    StackLayout {
+                        id: cyclerStack
+                        anchors.centerIn: parent
+                        currentIndex: (!weatherPrayerCycler.showWeather || (weatherPrayerCycler.bothActive && !weatherPrayerCycler.showingWeather)) ? 1 : 0
+
+                        Loader {
+                            active: weatherPrayerCycler.showWeather
+                            sourceComponent: WeatherBar {
+                                onPressed: if (weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle()
+                            }
+                        }
+
+                        Loader {
+                            active: weatherPrayerCycler.showPrayer
+                            sourceComponent: PrayerTimesBar {
+                                onPressed: if (weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle()
+                            }
+                        }
+                    }
                 }
+
 
                 UtilButtons {
                     visible: (Config.options.bar.verbose && root.useShortenedForm === 0)
@@ -306,7 +365,7 @@ Item { // Bar content region
         anchors {
             top: parent.top
             bottom: parent.bottom
-            left: middleSection.right
+            left: rightCenterGroup.right
             right: parent.right
         }
         implicitWidth: rightSectionRowLayout.implicitWidth
