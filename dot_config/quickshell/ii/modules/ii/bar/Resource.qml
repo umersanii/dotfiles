@@ -47,7 +47,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             lineWidth: Appearance.rounding.unsharpen
             value: percentage
-            implicitSize: 20
+            implicitSize: 21
             colPrimary: "black"
             colSecondary: root.colActive
             accountForLightBleeding: !root.warning
@@ -55,11 +55,11 @@ Item {
 
             Item {
                 anchors.centerIn: parent
-                width: resourceCircProg.implicitSize - resourceCircProg.lineWidth * 2 - 6
-                height: resourceCircProg.implicitSize - resourceCircProg.lineWidth * 2 - 6
+                width: resourceCircProg.implicitSize - 8
+                height: resourceCircProg.implicitSize - 8
                 
                 Loader {
-                    anchors.centerIn: parent
+                    anchors.fill: parent
                     sourceComponent: root.iconSource !== "" ? imgIcon : symIcon
                 }
                 Component {
@@ -68,7 +68,7 @@ Item {
                         font.weight: Font.DemiBold
                         fill: 1
                         text: iconName
-                        iconSize: Appearance.font.pixelSize.normal
+                        iconSize: parent.height
                         antialiasing: true
                         renderType: Text.QtRendering
                         color: "black"
@@ -77,11 +77,11 @@ Item {
                 Component {
                     id: imgIcon
                     Image {
-                        width: Appearance.font.pixelSize.normal
-                        height: Appearance.font.pixelSize.normal
+                        width: parent.width
+                        height: parent.height
                         source: root.iconSource
-                        sourceSize.width: Appearance.font.pixelSize.normal
-                        sourceSize.height: Appearance.font.pixelSize.normal
+                        sourceSize.width: parent.width
+                        sourceSize.height: parent.height
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         antialiasing: true
