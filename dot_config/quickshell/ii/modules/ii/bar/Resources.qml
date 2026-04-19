@@ -2,6 +2,8 @@ import qs.modules.common
 import qs.services
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 
 MouseArea {
     id: root
@@ -10,6 +12,27 @@ MouseArea {
     implicitWidth: rowLayout.implicitWidth + rowLayout.anchors.leftMargin + rowLayout.anchors.rightMargin
     implicitHeight: Appearance.sizes.barHeight
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+
+    property string gpuMode: "hybrid"
+
+    Process {
+        id: gpuModeProc
+        command: ["bash", "-c",
+            "if command -v envycontrol &>/dev/null; then envycontrol --query; " +
+            "elif lsmod | grep -q '^nvidia '; then " +
+            "  lsmod | grep -q '^amdgpu ' && echo hybrid || echo nvidia; " +
+            "else echo integrated; fi"]
+        running: true
+        stdout: SplitParser {
+            onRead: data => root.gpuMode = data.trim()
+        }
+    }
+
+    readonly property string gpuIconSource: {
+        if (gpuMode === "nvidia") return Quickshell.shellPath("assets/icons/nvidia-symbolic.svg")
+        if (gpuMode === "integrated") return Quickshell.shellPath("assets/icons/amd-symbolic.svg")
+        return Quickshell.shellPath("assets/icons/hybrid-symbolic.svg")
+    }
 
     RowLayout {
         id: rowLayout
@@ -36,7 +59,8 @@ MouseArea {
         }
 
         Resource {
-            iconName: "developer_board"
+            iconName: ""
+            iconSource: root.gpuIconSource
             percentage: ResourceUsage.gpuUsage
             shown: true
             Layout.leftMargin: 3
