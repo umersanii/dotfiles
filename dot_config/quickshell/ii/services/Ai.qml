@@ -320,6 +320,16 @@ Singleton {
             "key_get_description": Translation.tr("**Instructions**: Log into Groq Rocket Console, go to API Keys, and create a new key."),
             "api_format": "openai",
         }),
+        "pollinations": aiModelComponent.createObject(this, {
+            "name": "Pollinations (Free)",
+            "icon": "spark-symbolic",
+            "description": Translation.tr("Online | Free | No API key required\nPowered by Pollinations.ai — always available, no signup needed"),
+            "homepage": "https://pollinations.ai",
+            "endpoint": "https://text.pollinations.ai/openai",
+            "model": "openai",
+            "requires_key": false,
+            "api_format": "openai",
+        }),
     }
     property var modelList: Object.keys(root.models)
     property var currentModelId: Persistent.states?.ai?.model || modelList[0]
