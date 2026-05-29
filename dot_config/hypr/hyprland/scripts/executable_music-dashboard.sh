@@ -22,6 +22,7 @@ close_all() {
 
 if is_running; then
     close_all
+    rm -f /tmp/music-visual-mode
     notify-send -a "Music Dashboard" -i audio-headphones "Closed" -t 2000
     exit 0
 fi
