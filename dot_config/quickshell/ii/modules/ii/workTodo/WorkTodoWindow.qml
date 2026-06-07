@@ -45,20 +45,6 @@ Scope {
             right: Appearance.sizes.hyprlandGapsOut
         }
 
-        onVisibleChanged: {
-            if (visible) {
-                GlobalFocusGrab.addDismissable(panelWindow)
-            } else {
-                GlobalFocusGrab.removeDismissable(panelWindow)
-            }
-        }
-        Connections {
-            target: GlobalFocusGrab
-            function onDismissed() {
-                panelWindow.hide()
-            }
-        }
-
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Escape) {
                 panelWindow.hide()
