@@ -1,5 +1,6 @@
 pragma Singleton
 
+import qs
 import qs.modules.common
 import qs.modules.common.models
 import qs.modules.common.functions
@@ -102,7 +103,7 @@ Singleton {
         {
             action: "todo",
             execute: args => {
-                Todo.addTask(args);
+                (GlobalStates.showWorkTodo ? WorkTodo : Todo).addTask(args);
             }
         },
         {
