@@ -295,7 +295,7 @@ Variants {
                 }
 
                 FadeLoader {
-                    shown: Config.options.background.widgets.todo.enable && GlobalStates.desktopTodoVisible
+                    shown: Config.options.background.widgets.todo.enable && !GlobalStates.workTodoOpen
                     sourceComponent: TodoWidget {
                         screenWidth: bgRoot.screen.width
                         screenHeight: bgRoot.screen.height

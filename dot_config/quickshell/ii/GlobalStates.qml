@@ -29,7 +29,6 @@ Singleton {
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
     property bool workTodoOpen: false
-    property bool desktopTodoVisible: true
     property bool workspaceShowNumbers: false
 
     onSidebarRightOpenChanged: {
