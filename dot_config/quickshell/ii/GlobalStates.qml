@@ -29,6 +29,7 @@ Singleton {
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
     property bool workTodoOpen: false
+    property bool desktopTodoVisible: true
     property bool workspaceShowNumbers: false
 
     onSidebarRightOpenChanged: {
@@ -36,6 +37,12 @@ Singleton {
             Notifications.timeoutAll();
             Notifications.markAllRead();
         }
+    }
+
+    GlobalShortcut {
+        name: "desktopTodoToggle"
+        description: "Toggle desktop todo widget"
+        onPressed: root.desktopTodoVisible = !root.desktopTodoVisible
     }
 
     GlobalShortcut {
