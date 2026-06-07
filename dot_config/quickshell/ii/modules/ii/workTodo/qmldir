@@ -1,2 +1,4 @@
 module qs.modules.ii.workTodo
 WorkTodoWindow 1.0 WorkTodoWindow.qml
+WorkTodoTaskList 1.0 WorkTodoTaskList.qml
+WorkTodoItemActionButton 1.0 WorkTodoItemActionButton.qml

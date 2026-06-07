@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 
@@ -325,14 +326,26 @@ Scope {
 
     GlobalShortcut {
         name: "workTodoToggle"
-        description: "Toggle work todo window"
-        onPressed: GlobalStates.workTodoOpen = !GlobalStates.workTodoOpen
+        description: "Toggle work todo window and desktop todo widget"
+        onPressed: {
+            GlobalStates.workTodoOpen = !GlobalStates.workTodoOpen
+            GlobalStates.desktopTodoVisible = !GlobalStates.desktopTodoVisible
+        }
     }
 
     IpcHandler {
         target: "workTodo"
-        function toggle(): void { GlobalStates.workTodoOpen = !GlobalStates.workTodoOpen }
-        function open(): void { GlobalStates.workTodoOpen = true }
-        function close(): void { GlobalStates.workTodoOpen = false }
+        function toggle(): void {
+            GlobalStates.workTodoOpen = !GlobalStates.workTodoOpen
+            GlobalStates.desktopTodoVisible = !GlobalStates.desktopTodoVisible
+        }
+        function open(): void {
+            GlobalStates.workTodoOpen = true
+            GlobalStates.desktopTodoVisible = true
+        }
+        function close(): void {
+            GlobalStates.workTodoOpen = false
+            GlobalStates.desktopTodoVisible = false
+        }
     }
 }
