@@ -18,10 +18,11 @@ AbstractBackgroundWidget {
     implicitWidth: 400
     implicitHeight: Math.min(600, Math.max(300, contentColumn.implicitHeight + 40))
 
+    readonly property var activeList: GlobalStates.showWorkTodo ? WorkTodo.list : Todo.list
     readonly property int pendingCount: {
         let count = 0
-        for (let i = 0; i < Todo.list.length; i++) {
-            if (!Todo.list[i].done) count++
+        for (let i = 0; i < activeList.length; i++) {
+            if (!activeList[i].done) count++
         }
         return count
     }
@@ -58,7 +59,7 @@ AbstractBackgroundWidget {
                 }
 
                 StyledText {
-                    text: Translation.tr("To Do")
+                    text: GlobalStates.showWorkTodo ? Translation.tr("Work Todo") : Translation.tr("To Do")
                     font.pixelSize: Appearance.font.pixelSize.large
                     font.weight: Font.Bold
                     color: needsColText ? colText : Appearance.colors.colOnLayer1
@@ -76,7 +77,7 @@ AbstractBackgroundWidget {
                     StyledText {
                         id: summaryText
                         anchors.centerIn: parent
-                        text: `${root.pendingCount}/${Todo.list.length}`
+                        text: `${root.pendingCount}/${root.activeList.length}`
                         font.pixelSize: Appearance.font.pixelSize.small
                         font.weight: Font.Medium
                         color: root.pendingCount > 0 ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSecondaryContainer
@@ -102,7 +103,7 @@ AbstractBackgroundWidget {
                     spacing: 6
 
                     Repeater {
-                        model: Todo.list
+                        model: root.activeList
 
                         delegate: Rectangle {
                             required property var modelData
@@ -148,7 +149,7 @@ AbstractBackgroundWidget {
 
                     // Empty state
                     Item {
-                        visible: Todo.list.length === 0
+                        visible: root.activeList.length === 0
                         Layout.fillWidth: true
                         Layout.preferredHeight: 150
                         Layout.alignment: Qt.AlignCenter

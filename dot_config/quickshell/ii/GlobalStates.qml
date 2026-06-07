@@ -29,7 +29,7 @@ Singleton {
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
     property bool workTodoOpen: false
-    property bool desktopTodoVisible: true
+    property bool showWorkTodo: false
     property bool workspaceShowNumbers: false
 
     onSidebarRightOpenChanged: {
@@ -42,7 +42,7 @@ Singleton {
     GlobalShortcut {
         name: "desktopTodoToggle"
         description: "Toggle desktop todo widget"
-        onPressed: root.desktopTodoVisible = !root.desktopTodoVisible
+        onPressed: root.showWorkTodo = !root.showWorkTodo
     }
 
     GlobalShortcut {
