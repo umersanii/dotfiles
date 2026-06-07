@@ -10,6 +10,7 @@ import Quickshell
 Item {
     id: root
     required property var taskList
+    property bool useWorkTodo: true
     property string emptyPlaceholderIcon
     property string emptyPlaceholderText
     property int todoListItemSpacing: 5
@@ -62,9 +63,9 @@ Item {
                         WorkTodoItemActionButton {
                             onClicked: {
                                 if (!todoItem.modelData.done)
-                                    WorkTodo.markDone(todoItem.modelData.originalIndex)
+                                    (root.useWorkTodo ? WorkTodo : Todo).markDone(todoItem.modelData.originalIndex)
                                 else
-                                    WorkTodo.markUnfinished(todoItem.modelData.originalIndex)
+                                    (root.useWorkTodo ? WorkTodo : Todo).markUnfinished(todoItem.modelData.originalIndex)
                             }
                             contentItem: MaterialSymbol {
                                 anchors.centerIn: parent
@@ -75,7 +76,7 @@ Item {
                             }
                         }
                         WorkTodoItemActionButton {
-                            onClicked: WorkTodo.deleteItem(todoItem.modelData.originalIndex)
+                            onClicked: (root.useWorkTodo ? WorkTodo : Todo).deleteItem(todoItem.modelData.originalIndex)
                             contentItem: MaterialSymbol {
                                 anchors.centerIn: parent
                                 horizontalAlignment: Text.AlignHCenter

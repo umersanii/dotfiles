@@ -59,7 +59,7 @@ AbstractBackgroundWidget {
                 }
 
                 StyledText {
-                    text: GlobalStates.showWorkTodo ? Translation.tr("Beetleye Work") : Translation.tr("Beetleye Todo")
+                    text: GlobalStates.showWorkTodo ? Translation.tr("BeetleOps") : Translation.tr("Todo")
                     font.pixelSize: Appearance.font.pixelSize.large
                     font.weight: Font.Bold
                     color: needsColText ? colText : Appearance.colors.colOnLayer1

@@ -89,13 +89,13 @@ Scope {
                         spacing: 10
 
                         MaterialSymbol {
-                            text: "work"
+                            text: GlobalStates.showWorkTodo ? "work" : "checklist"
                             iconSize: Appearance.font.pixelSize.larger
                             color: Appearance.colors.colPrimary
                         }
                         StyledText {
                             Layout.fillWidth: true
-                            text: "Work Todo"
+                            text: GlobalStates.showWorkTodo ? "BeetleOps" : "Todo"
                             font.pixelSize: Appearance.font.pixelSize.large
                             font.weight: Font.Medium
                             color: Appearance.m3colors.m3onSurface
@@ -156,7 +156,8 @@ Scope {
                                 listBottomPadding: root.fabSize + root.fabMargins * 2
                                 emptyPlaceholderIcon: "check_circle"
                                 emptyPlaceholderText: "Nothing here!"
-                                taskList: WorkTodo.list
+                                useWorkTodo: GlobalStates.showWorkTodo
+                                taskList: (GlobalStates.showWorkTodo ? WorkTodo.list : Todo.list)
                                     .map(function(item, i) { return Object.assign({}, item, {originalIndex: i}) })
                                     .filter(function(item) { return !item.done })
                             }
@@ -164,7 +165,8 @@ Scope {
                                 listBottomPadding: root.fabSize + root.fabMargins * 2
                                 emptyPlaceholderIcon: "checklist"
                                 emptyPlaceholderText: "Finished tasks will go here"
-                                taskList: WorkTodo.list
+                                useWorkTodo: GlobalStates.showWorkTodo
+                                taskList: (GlobalStates.showWorkTodo ? WorkTodo.list : Todo.list)
                                     .map(function(item, i) { return Object.assign({}, item, {originalIndex: i}) })
                                     .filter(function(item) { return item.done })
                             }
@@ -233,7 +235,7 @@ Scope {
 
                             function addTask() {
                                 if (todoInput.text.length > 0) {
-                                    WorkTodo.addTask(todoInput.text)
+                                    (GlobalStates.showWorkTodo ? WorkTodo : Todo).addTask(todoInput.text)
                                     todoInput.text = ""
                                     contentArea.showAddDialog = false
                                     tabBar.setCurrentIndex(0)
@@ -252,7 +254,7 @@ Scope {
                                     Layout.alignment: Qt.AlignLeft
                                     color: Appearance.m3colors.m3onSurface
                                     font.pixelSize: Appearance.font.pixelSize.larger
-                                    text: "Add work task"
+                                    text: GlobalStates.showWorkTodo ? "Add work task" : "Add task"
                                 }
 
                                 TextField {
