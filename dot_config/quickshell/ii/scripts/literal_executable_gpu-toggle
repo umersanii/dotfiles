@@ -1,0 +1,36 @@
+#!/bin/bash
+# GPU toggle utility
+# Usage: gpu-toggle [gpu|cpu|status]
+
+GPU_STATE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gpu-state"
+
+case "${1:-status}" in
+    gpu)
+        mkdir -p "$(dirname "$GPU_STATE_FILE")"
+        echo "gpu" > "$GPU_STATE_FILE"
+        echo "✓ GPU acceleration enabled"
+        echo "  Restart applications for changes to take effect"
+        ;;
+    cpu)
+        mkdir -p "$(dirname "$GPU_STATE_FILE")"
+        echo "cpu" > "$GPU_STATE_FILE"
+        echo "✓ GPU acceleration disabled (CPU rendering)"
+        echo "  Restart applications for changes to take effect"
+        ;;
+    status|*)
+        if [ -f "$GPU_STATE_FILE" ]; then
+            MODE=$(cat "$GPU_STATE_FILE")
+        else
+            MODE="gpu"
+        fi
+        
+        case "$MODE" in
+            gpu)
+                echo "Current GPU Mode: ⚡ GPU Hardware Acceleration"
+                ;;
+            cpu)
+                echo "Current GPU Mode: 💻 CPU Software Rendering"
+                ;;
+        esac
+        ;;
+esac
