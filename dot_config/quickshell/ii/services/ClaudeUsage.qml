@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 
 import qs.modules.common
+import qs.modules.common.functions
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -14,7 +15,6 @@ Singleton {
     property string fiveHourResetsAt: ""      // ISO date string
     property string sevenDayResetsAt: ""      // ISO date string
 
-    // sessionResetAt / weeklyResetAt are ISO strings from ccstatusline
     function formatResetAt(isoString) {
         if (!isoString) return "?"
         const d = new Date(isoString)
@@ -31,34 +31,35 @@ Singleton {
         return d.toLocaleDateString([], { month: "short", day: "numeric" })
     }
 
-    Timer {
-        interval: 60000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: poller.running = true
+    function parseUsage() {
+        const raw = usageFile.text()
+        if (!raw) return
+        try {
+            const d = JSON.parse(raw)
+            root.fiveHourUsedPercentage = (d?.sessionUsage ?? 0) / 100
+            root.sevenDayUsedPercentage = (d?.weeklyUsage ?? 0) / 100
+            root.fiveHourResetsAt = d?.sessionResetAt ?? ""
+            root.sevenDayResetsAt = d?.weeklyResetAt ?? ""
+        } catch (e) {
+            console.warn("[ClaudeUsage] parse error:", e.message)
+        }
     }
 
-    // Reads ~/.cache/ccstatusline/usage.json — kept fresh (≤3 min) by ccstatusline's
-    // OAuth API call to api.anthropic.com/api/oauth/usage during active sessions.
-    Process {
-        id: poller
-        command: ["bash", "-c", "cat ~/.cache/ccstatusline/usage.json 2>/dev/null"]
-        stdout: StdioCollector {
-            id: pollerOut
-            onStreamFinished: {
-                const raw = pollerOut.text.trim()
-                if (!raw) return
-                try {
-                    const d = JSON.parse(raw)
-                    root.fiveHourUsedPercentage = (d?.sessionUsage ?? 0) / 100
-                    root.sevenDayUsedPercentage = (d?.weeklyUsage ?? 0) / 100
-                    root.fiveHourResetsAt = d?.sessionResetAt ?? ""
-                    root.sevenDayResetsAt = d?.weeklyResetAt ?? ""
-                } catch (e) {
-                    console.warn("[ClaudeUsage] parse error:", e.message)
-                }
-            }
+    Timer {
+        id: readTimer
+        interval: 100
+        repeat: false
+        onTriggered: root.parseUsage()
+    }
+
+    FileView {
+        id: usageFile
+        path: Qt.resolvedUrl(FileUtils.trimFileProtocol(`${Directories.genericCache}/ccstatusline/usage.json`))
+        watchChanges: true
+        onFileChanged: {
+            this.reload()
+            readTimer.start()
         }
+        onLoaded: root.parseUsage()
     }
 }
