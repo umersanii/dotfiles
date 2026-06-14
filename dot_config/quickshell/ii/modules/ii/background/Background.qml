@@ -210,6 +210,7 @@ Variants {
 
             WidgetCanvas {
                 id: widgetCanvas
+                visible: modelData.name !== "HDMI-A-1"
                 anchors {
                     left: wallpaper.left
                     right: wallpaper.right
