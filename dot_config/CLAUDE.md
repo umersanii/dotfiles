@@ -43,3 +43,10 @@ chezmoi edit ~/.config/<path/to/file>
 ## Editing Workflow
 
 When editing configs directly in `~/.config/`, run `chezmoi re-add <file>` afterward to sync back to the source. The auto-sync timer will handle git push, or run `dotfiles-sync.sh` manually.
+
+## Known Issues & Fixes
+
+### External monitor shows black screen after switching from mirror to extended
+When changing `hypr/monitors.conf` from mirror mode to extended, Quickshell won't spawn background/bar layers on the new monitor even after `hyprctl reload` or restarting Quickshell. This is because Wayland clients need a `wl_output` announcement event, which only happens on a physical hotplug.
+
+**Fix**: Unplug and replug the HDMI cable after applying the config change.
