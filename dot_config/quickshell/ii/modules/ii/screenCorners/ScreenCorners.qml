@@ -138,7 +138,7 @@ Scope {
     }
 
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(s => s.name !== "HDMI-A-1")
 
         Scope {
             id: monitorScope
