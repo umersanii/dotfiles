@@ -18,7 +18,7 @@ Scope { // Scope
 
     Variants {
         // For each monitor
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(s => s.name !== "HDMI-A-1")
 
         PanelWindow {
             id: dockRoot
