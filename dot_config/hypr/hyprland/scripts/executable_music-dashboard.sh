@@ -30,7 +30,7 @@ fi
 # Kill any stale processes
 close_all
 pkill -x cava 2>/dev/null
-pkill -x sptlrx-scaled 2>/dev/null
+pkill -f sptlrx-scaled 2>/dev/null
 # Kill existing muser if already open (avoid duplicate)
 if hyprctl clients -j 2>/dev/null | python3 -c "
 import json, sys
@@ -49,6 +49,6 @@ muser &
 sleep 0.6
 kitty --class music-cava -e cava &
 sleep 0.3
-kitty --class music-sptlrx -e sptlrx-scaled &
+kitty --class music-sptlrx -e "$HOME/.local/bin/sptlrx-scaled" &
 sleep 0.3
 kitty --class music-clock -e ~/.config/hypr/hyprland/scripts/tty-clock-themed.sh &
