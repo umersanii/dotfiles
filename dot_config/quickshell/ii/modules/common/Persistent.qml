@@ -143,6 +143,14 @@ Singleton {
                     property real width: 460
                     property real height: 330
                 }
+                property JsonObject linkBoard: JsonObject {
+                    property bool pinned: false
+                    property bool clickthrough: false
+                    property real x: 900
+                    property real y: 42
+                    property real width: 350
+                    property real height: 400
+                }
             }
 
             property JsonObject timer: JsonObject {
