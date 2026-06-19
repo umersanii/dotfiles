@@ -75,20 +75,24 @@ Scope {
         }
     }
 
-    function quickToggle() {
+    function quickPinToggle() {
         const widgets = Config.options.overlay.quickToggleWidgets;
-        if (GlobalStates.overlayOpen) {
-            GlobalStates.overlayOpen = false;
-            return;
-        }
-        // Ensure the configured widgets are in the open list
-        let openList = Persistent.states.overlay.open;
+        const allPinned = widgets.every(w => OverlayContext.pinnedWidgetIdentifiers.includes(w));
         for (const w of widgets) {
-            if (!openList.includes(w)) {
-                openList.push(w);
+            const entry = Persistent.states.overlay[w];
+            if (!entry) continue;
+            if (allPinned) {
+                entry.pinned = false;
+                OverlayContext.pin(w, false);
+                Persistent.states.overlay.open = Persistent.states.overlay.open.filter(id => id !== w);
+            } else {
+                if (!Persistent.states.overlay.open.includes(w))
+                    Persistent.states.overlay.open.push(w);
+                entry.pinned = true;
+                entry.clickthrough = false;
+                OverlayContext.pin(w, true);
             }
         }
-        GlobalStates.overlayOpen = true;
     }
 
     IpcHandler {
@@ -98,8 +102,8 @@ Scope {
             GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
         }
 
-        function quickToggle(): void {
-            root.quickToggle();
+        function quickPinToggle(): void {
+            root.quickPinToggle();
         }
     }
 
@@ -113,11 +117,11 @@ Scope {
     }
 
     GlobalShortcut {
-        name: "overlayQuickToggle"
-        description: "Opens overlay with selected widgets"
+        name: "overlayQuickPinToggle"
+        description: "Toggles pinned state of selected widgets without opening overlay"
 
         onPressed: {
-            root.quickToggle();
+            root.quickPinToggle();
         }
     }
 }
