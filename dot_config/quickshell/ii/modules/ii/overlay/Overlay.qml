@@ -75,11 +75,31 @@ Scope {
         }
     }
 
+    function quickToggle() {
+        const widgets = Config.options.overlay.quickToggleWidgets;
+        if (GlobalStates.overlayOpen) {
+            GlobalStates.overlayOpen = false;
+            return;
+        }
+        // Ensure the configured widgets are in the open list
+        let openList = Persistent.states.overlay.open;
+        for (const w of widgets) {
+            if (!openList.includes(w)) {
+                openList.push(w);
+            }
+        }
+        GlobalStates.overlayOpen = true;
+    }
+
     IpcHandler {
         target: "overlay"
 
         function toggle(): void {
             GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
+        }
+
+        function quickToggle(): void {
+            root.quickToggle();
         }
     }
 
@@ -89,6 +109,15 @@ Scope {
 
         onPressed: {
             GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
+        }
+    }
+
+    GlobalShortcut {
+        name: "overlayQuickToggle"
+        description: "Opens overlay with selected widgets"
+
+        onPressed: {
+            root.quickToggle();
         }
     }
 }
