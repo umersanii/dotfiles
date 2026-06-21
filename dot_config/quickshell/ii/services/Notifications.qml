@@ -186,6 +186,7 @@ Singleton {
                 const appSoundMap = {
                     "whatsapp":  soundsDir + "whatsapp.wav",
                     "claude":    soundsDir + "claude.wav",
+                    "prayer":    soundsDir + "prayer.wav",
                 };
                 const lowerApp = notification.appName.toLowerCase();
                 const soundFile = appSoundMap[lowerApp] ?? (soundsDir + "default.mp3");

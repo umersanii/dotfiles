@@ -182,7 +182,7 @@ Singleton {
         const ampm = h >= 12 ? "PM" : "AM";
         h = h % 12 || 12;
         const timeStr = `${h}:${String(m).padStart(2, "0")} ${ampm}`;
-        prayerNotifier.command[2] = `notify-send "${prayer}" "${timeStr}" -i "${icon}" -t 10000`;
+        prayerNotifier.command[2] = `notify-send -a "Prayer" "${prayer}" "${timeStr}" -i "${icon}" -t 10000`;
         prayerNotifier.running = true;
     }
 
