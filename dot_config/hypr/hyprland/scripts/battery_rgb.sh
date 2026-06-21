@@ -16,6 +16,9 @@ get_battery_level() {
 }
 
 main() {
+    # Don't fight music mode — it owns the keyboard while active
+    [[ -f "/tmp/music-keyboard-mode" ]] && exit 0
+
     local level
     level=$(get_battery_level)
 
