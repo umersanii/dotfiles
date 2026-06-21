@@ -16,6 +16,7 @@ sys.exit(0 if any(c['class'] in ('music-cava', 'music-sptlrx') for c in json.loa
 close_all() {
     pkill -f "standalone_app.py" 2>/dev/null
     pkill -f "cava-colors.py" 2>/dev/null
+    pkill -f "keyboard-music-sync.py" 2>/dev/null
     pkill -f "tty-clock-themed.sh" 2>/dev/null
     pkill -f "tty-clock" 2>/dev/null
     hyprctl dispatch closewindow "class:music-cava" 2>/dev/null
@@ -53,6 +54,8 @@ notify-send -a "Music Dashboard" -i audio-headphones "Opening..." -t 2000
 
 echo "$(date '+%H:%M:%S') Launching cava-colors..." >> "$DBG"
 python3 ~/.config/hypr/hyprland/scripts/cava-colors.py &
+echo "$(date '+%H:%M:%S') Launching keyboard-music-sync..." >> "$DBG"
+python3 ~/.config/hypr/hyprland/scripts/keyboard-music-sync.py &
 echo "$(date '+%H:%M:%S') Launching muser..." >> "$DBG"
 muser &
 MUSER_PID=$!
