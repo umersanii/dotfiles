@@ -136,4 +136,8 @@ Singleton {
         ];
         Quickshell.execDetached(command);
     }
+
+    function playCustomSound(filePath) {
+        Quickshell.execDetached(["ffplay", "-nodisp", "-autoexit", filePath]);
+    }
 }
