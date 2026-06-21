@@ -44,6 +44,7 @@ Singleton {
         temp: 0,
         tempFeelsLike: 0,
         lastRefresh: 0,
+        isDay: true,
     })
 
     readonly property var cityCoordinates: ({
@@ -89,6 +90,7 @@ Singleton {
                 
                 temp.city = root.city || "Location";
                 temp.wCode = current.weather_code || 0;
+                temp.isDay = current.is_day !== 0;
                 temp.windDir = "N"; // TODO: improve wind direction
                 temp.humidity = hourly?.relative_humidity_2m?.[0] || 0;
                 if (typeof temp.humidity === 'number') {
@@ -173,7 +175,7 @@ Singleton {
         }
         
         // Use Open-Meteo API (fast, no rate limits, no auth required)
-        let command = `curl -s --max-time 3 "https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature,weather_code,windspeed&hourly=relative_humidity_2m&daily=sunrise,sunset&temperature_unit=celsius&timezone=auto" | jq .`;
+        let command = `curl -s --max-time 3 "https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature,weather_code,windspeed,is_day&hourly=relative_humidity_2m&daily=sunrise,sunset&temperature_unit=celsius&timezone=auto" | jq .`;
         
         fetcher.command[2] = command;
         fetcher.running = true;

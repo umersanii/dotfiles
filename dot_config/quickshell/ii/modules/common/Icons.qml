@@ -22,6 +22,7 @@ Singleton {
     }
 
     readonly property var weatherIconMap: ({
+        // wttr.in codes (legacy)
         "113": "clear_day",
         "116": "partly_cloudy_day",
         "119": "cloud",
@@ -69,14 +70,48 @@ Singleton {
         "386": "thunderstorm",
         "389": "thunderstorm",
         "392": "thunderstorm",
-        "395": "snowing"
+        "395": "snowing",
+        // WMO codes (Open-Meteo)
+        "0": "clear_day",
+        "1": "clear_day",
+        "2": "partly_cloudy_day",
+        "3": "cloud",
+        "45": "foggy",
+        "48": "foggy",
+        "51": "rainy",
+        "53": "rainy",
+        "55": "rainy",
+        "56": "rainy",
+        "57": "rainy",
+        "61": "rainy",
+        "63": "rainy",
+        "65": "rainy",
+        "66": "rainy",
+        "67": "rainy",
+        "71": "cloudy_snowing",
+        "73": "cloudy_snowing",
+        "75": "snowing_heavy",
+        "77": "cloudy_snowing",
+        "80": "rainy",
+        "81": "rainy",
+        "82": "weather_hail",
+        "85": "cloudy_snowing",
+        "86": "snowing_heavy",
+        "95": "thunderstorm",
+        "96": "thunderstorm",
+        "99": "thunderstorm"
     })
 
-    
-    function getWeatherIcon(code) {
+
+    function getWeatherIcon(code, isDay) {
         const key = String(code)
         if (weatherIconMap.hasOwnProperty(key)) {
-            return weatherIconMap[key]
+            let icon = weatherIconMap[key]
+            if (isDay === false) {
+                if (icon === "clear_day") return "clear_night"
+                if (icon === "partly_cloudy_day") return "partly_cloudy_night"
+            }
+            return icon
         }
     }
 }

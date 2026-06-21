@@ -45,7 +45,7 @@ AbstractBackgroundWidget {
         MaterialSymbol {
             iconSize: 80
             color: Appearance.colors.colOnPrimaryContainer
-            text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+            text: Icons.getWeatherIcon(Weather.data.wCode, Weather.data.isDay) ?? "cloud"
             anchors {
                 left: parent.left
                 bottom: parent.bottom
