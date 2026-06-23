@@ -496,7 +496,9 @@ Item { // Bar content region
             }
 
             KdeConnectButton {
+                id: kdeConnectButton
                 Layout.alignment: Qt.AlignVCenter
+                visible: deviceReachable
             }
 
             // Battery (Moved to far right and wrapped in BarGroup)
