@@ -406,7 +406,7 @@ Item { // Bar content region
             spacing: 5
             layoutDirection: Qt.RightToLeft
 
-            AnimatedBarLogo {
+            KdeConnectButton {
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 Layout.rightMargin: Appearance.rounding.screenRounding
             }
