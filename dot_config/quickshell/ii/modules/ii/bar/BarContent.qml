@@ -231,6 +231,19 @@ Item { // Bar content region
             showBackground: false
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+
+            // Update age border: white >= 7 days, red >= 14 days
+            Rectangle {
+                anchors.fill: parent
+                anchors.topMargin: 4
+                anchors.bottomMargin: 4
+                radius: Appearance.rounding.normal
+                color: "transparent"
+                border.width: Updates.daysSinceLastUpdate >= 7 ? 1 : 0
+                border.color: Updates.daysSinceLastUpdate >= 14 ? "#F44336" : "white"
+                visible: Updates.daysSinceLastUpdate >= 7
+            }
+
             ActiveWindow {
                 id: activeWindowWidget
                 Layout.fillWidth: true
@@ -406,16 +419,11 @@ Item { // Bar content region
             spacing: 5
             layoutDirection: Qt.RightToLeft
 
-            KdeConnectButton {
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                Layout.rightMargin: Appearance.rounding.screenRounding
-            }
-
             RippleButton { // Right sidebar button
                 id: rightSidebarButton
 
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                Layout.rightMargin: 0
+                Layout.rightMargin: Appearance.rounding.screenRounding
                 Layout.fillWidth: false
 
                 implicitWidth: indicatorsRowLayout.implicitWidth + 12 * 2
@@ -485,6 +493,10 @@ Item { // Bar content region
                         color: rightSidebarButton.colText
                     }
                 }
+            }
+
+            KdeConnectButton {
+                Layout.alignment: Qt.AlignVCenter
             }
 
             // Battery (Moved to far right and wrapped in BarGroup)
