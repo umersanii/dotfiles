@@ -27,20 +27,23 @@ Item {
         onTriggered: statusProc.running = true
     }
 
+    property bool _foundDevice: false
+
     Process {
         id: statusProc
         command: ["kdeconnect-cli", "-a", "--name-only"]
+        onStarted: root._foundDevice = false
         stdout: SplitParser {
             onRead: data => {
                 const line = data.trim();
                 if (line.length > 0) {
-                    root.deviceReachable = true;
+                    root._foundDevice = true;
                     root.deviceName = line;
                 }
             }
         }
         onExited: (code, status) => {
-            if (code !== 0) root.deviceReachable = false;
+            root.deviceReachable = root._foundDevice;
             if (root.deviceReachable) idProc.running = true;
         }
     }
