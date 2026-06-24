@@ -157,9 +157,6 @@ Scope {
         description: "Toggles search on press"
 
         onPressed: {
-            if (!GlobalStates.superReleaseMightTrigger) {
-                return;
-            }
             GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
         }
     }
