@@ -20,6 +20,7 @@ AbstractQuickPanel {
         padding: 5
         color: Appearance.colors.colLayer1
 
+        HotspotToggle {}
         NetworkToggle {
             altAction: () => {
                 root.openWifiDialog();
