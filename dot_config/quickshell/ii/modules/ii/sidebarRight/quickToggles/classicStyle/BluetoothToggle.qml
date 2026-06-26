@@ -20,7 +20,11 @@ QuickToggleButton {
             GlobalStates.sidebarRightOpen = false
             return
         }
-        Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled
+        if (!Bluetooth.defaultAdapter.enabled) {
+            Quickshell.execDetached(["bash", "-c", "rfkill unblock bluetooth && bluetoothctl power on"])
+        } else {
+            Bluetooth.defaultAdapter.enabled = false
+        }
     }
     altAction: () => {
         Quickshell.execDetached(["bash", "-c", `${Config.options.apps.bluetooth}`])
