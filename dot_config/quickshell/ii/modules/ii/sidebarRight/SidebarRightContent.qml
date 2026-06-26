@@ -125,6 +125,15 @@ Item {
         }
     }
 
+    Connections {
+        target: Bluetooth.defaultAdapter
+        function onEnabledChanged() {
+            if (Bluetooth.defaultAdapter?.enabled && root.showBluetoothDialog) {
+                Bluetooth.defaultAdapter.discovering = true;
+            }
+        }
+    }
+
     ToggleDialog {
         shownPropertyString: "showBluetoothDialog"
         dialog: BluetoothDialog {}
@@ -139,8 +148,12 @@ Item {
             if (!shown) {
                 Bluetooth.defaultAdapter.discovering = false;
             } else {
-                Bluetooth.defaultAdapter.enabled = true;
-                Bluetooth.defaultAdapter.discovering = true;
+                if (Bluetooth.defaultAdapter.enabled) {
+                    Bluetooth.defaultAdapter.discovering = true;
+                } else {
+                    Quickshell.execDetached(["bash", "-c", "rfkill unblock bluetooth && bluetoothctl power on"]);
+                    // Discovery starts via onEnabledChanged once adapter powers on
+                }
             }
         }
     }
