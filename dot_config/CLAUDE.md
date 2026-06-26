@@ -50,3 +50,38 @@ When editing configs directly in `~/.config/`, run `chezmoi re-add <file>` after
 When changing `hypr/monitors.conf` from mirror mode to extended, Quickshell won't spawn background/bar layers on the new monitor even after `hyprctl reload` or restarting Quickshell. This is because Wayland clients need a `wl_output` announcement event, which only happens on a physical hotplug.
 
 **Fix**: Unplug and replug the HDMI cable after applying the config change.
+
+---
+
+## Ongoing: NVIDIA Isaac Sim Setup (IN PROGRESS)
+
+**Goal**: Run `nvcr.io/nvidia/isaac-sim:5.0.0` (or 5.1.0) headlessly via Docker.
+
+### Current State
+- **Kernel**: `6.12.75-1-lts` (pinned via `IgnorePkg` in `/etc/pacman.conf`)
+- **Driver**: `nvidia 610.43.02` (upgraded from 565.77)
+- **GPU**: RTX 3070 Ti Laptop GPU
+- **Docker runtime**: nvidia set as default in `/etc/docker/daemon.json`
+- `nvidia-smi` works on host and inside Docker
+- CUDA works on host (`cuInit` returns 0)
+- CUDA works in Docker only with `--privileged`
+- Isaac Sim 5.0.0 and 5.1.0-rc.19 both segfault in `librtx.scenedb.plugin.so` at `carbOnPluginStartup` — driver 610 is too new for Isaac Sim's bundled RTX libraries
+
+### What Was Tried
+- Isaac Sim 4.5.0 — broken: requires driver ≤565, but 565.77 can't build on kernel ≥6.12 (missing `phys_to_dma`, `dma_is_direct`, `ioremap_driver_hardened_wc`)
+- Driver 565.77 on kernel 6.12 — broken: GCC 14 + missing kernel APIs, unfixable without patching driver source
+- Isaac Sim 5.1.0-rc.19 — segfault (rc build, unstable)
+- Isaac Sim 5.0.0 — segfault in RTX scenedb plugin, even with `--privileged`
+- Tried on bare metal (no Docker) — also didn't work
+
+### Next Step
+Downgrade NVIDIA driver to ~575.x — new enough to compile on kernel 6.12, within Isaac Sim 5.0.0's tested range:
+```bash
+curl -s "https://archive.archlinux.org/packages/n/nvidia-dkms/" | grep "575\."
+```
+Then downgrade via `sudo pacman -U <archive-url>` for `nvidia-dkms`, `nvidia-utils`, `lib32-nvidia-utils`.
+
+### Key Config Files
+- `/etc/pacman.conf` — `IgnorePkg = linux-lts linux-lts-headers` (kernel pinned to 6.12)
+- `/etc/docker/daemon.json` — nvidia default runtime
+- `/usr/src/nvidia-565.77/Kbuild` — was patched with `-Wno-error=incompatible-pointer-types` (no longer relevant, driver is now 610)
