@@ -52,6 +52,16 @@ Singleton {
                         ? "signal_wifi_off"
                         : "signal_wifi_bad"
 
+    property bool hotspotEnabled: false
+
+    function toggleHotspot(): void {
+        if (root.hotspotEnabled) {
+            hotspotStopProc.running = true;
+        } else {
+            hotspotStartProc.running = true;
+        }
+    }
+
     // Control
     function enableWifi(enabled = true): void {
         const cmd = enabled ? "on" : "off";
@@ -151,12 +161,40 @@ Singleton {
         }
     }
 
+    Process {
+        id: hotspotStatusProc
+        running: true
+        command: ["sh", "-c", "nmcli -t -f NAME,STATE con show --active | grep -q '^Hotspot:activated' && echo 1 || echo 0"]
+        stdout: SplitParser {
+            onRead: data => {
+                root.hotspotEnabled = data.trim() === "1";
+            }
+        }
+    }
+
+    Process {
+        id: hotspotStartProc
+        command: ["nmcli", "device", "wifi", "hotspot"]
+        onExited: (exitCode) => {
+            hotspotStatusProc.running = true;
+        }
+    }
+
+    Process {
+        id: hotspotStopProc
+        command: ["nmcli", "connection", "down", "Hotspot"]
+        onExited: (exitCode) => {
+            hotspotStatusProc.running = true;
+        }
+    }
+
     // Status update
     function update() {
         updateConnectionType.startCheck();
         wifiStatusProcess.running = true
         updateNetworkName.running = true;
         updateNetworkStrength.running = true;
+        hotspotStatusProc.running = true;
     }
 
     Process {
