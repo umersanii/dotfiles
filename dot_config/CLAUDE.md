@@ -57,31 +57,39 @@ When changing `hypr/monitors.conf` from mirror mode to extended, Quickshell won'
 
 **Goal**: Run `nvcr.io/nvidia/isaac-sim:5.0.0` (or 5.1.0) headlessly via Docker.
 
+### Driver Compatibility Research (confirmed 2026-06-27)
+- Isaac Sim 5.0.0 officially supports driver branches: **R570** (570.169), **R580** (580.95.05), **R595** (595.58.03)
+- Driver **610.x is NOT listed** in any supported branch → causes `librtx.scenedb.plugin.so` segfault at `carbOnPluginStartup`
+- R595 is not available in Arch repos/archive; R580 is the best available target
+- All required 580.119.02-1 packages confirmed in Arch archive
+
 ### Current State
 - **Kernel**: `6.12.75-1-lts` (pinned via `IgnorePkg` in `/etc/pacman.conf`)
-- **Driver**: `nvidia 610.43.02` (upgraded from 565.77)
+- **Driver**: `nvidia-open-dkms 580.119.02` ✅ downgraded from 610.43.02 on 2026-06-27
+  - DKMS module rebuilt successfully, CDI file updated
+  - **NOT YET REBOOTED** — new driver not active until reboot
 - **GPU**: RTX 3070 Ti Laptop GPU
 - **Docker runtime**: nvidia set as default in `/etc/docker/daemon.json`
-- `nvidia-smi` works on host and inside Docker
-- CUDA works on host (`cuInit` returns 0)
-- CUDA works in Docker only with `--privileged`
-- Isaac Sim 5.0.0 and 5.1.0-rc.19 both segfault in `librtx.scenedb.plugin.so` at `carbOnPluginStartup` — driver 610 is too new for Isaac Sim's bundled RTX libraries
+- Isaac Sim 5.0.0 and 5.1.0-rc.19 both segfault in `librtx.scenedb.plugin.so` at `carbOnPluginStartup` (with driver 610)
 
 ### What Was Tried
 - Isaac Sim 4.5.0 — broken: requires driver ≤565, but 565.77 can't build on kernel ≥6.12 (missing `phys_to_dma`, `dma_is_direct`, `ioremap_driver_hardened_wc`)
 - Driver 565.77 on kernel 6.12 — broken: GCC 14 + missing kernel APIs, unfixable without patching driver source
 - Isaac Sim 5.1.0-rc.19 — segfault (rc build, unstable)
-- Isaac Sim 5.0.0 — segfault in RTX scenedb plugin, even with `--privileged`
-- Tried on bare metal (no Docker) — also didn't work
+- Isaac Sim 5.0.0 — segfault in RTX scenedb plugin, even with `--privileged` and on bare metal
+- Driver 610.43.02 — too new, not in any Isaac Sim supported branch
 
-### Next Step
-Downgrade NVIDIA driver to ~575.x — new enough to compile on kernel 6.12, within Isaac Sim 5.0.0's tested range:
-```bash
-curl -s "https://archive.archlinux.org/packages/n/nvidia-dkms/" | grep "575\."
-```
-Then downgrade via `sudo pacman -U <archive-url>` for `nvidia-dkms`, `nvidia-utils`, `lib32-nvidia-utils`.
+### Next Steps
+1. **Pin nvidia packages** in `/etc/pacman.conf` to prevent auto-upgrade back to 610:
+   ```bash
+   sudo sed -i 's/IgnorePkg = linux-lts linux-lts-headers/IgnorePkg = linux-lts linux-lts-headers nvidia-open-dkms nvidia-utils lib32-nvidia-utils nvidia-settings/' /etc/pacman.conf
+   ```
+2. **Reboot** to activate the new driver
+3. Verify with `nvidia-smi` (should show 580.119.02)
+4. Re-run Isaac Sim 5.0.0 and check if segfault is gone
+
+If 580 still segfaults → try R570 (570.153.02-1) from Arch archive.
 
 ### Key Config Files
-- `/etc/pacman.conf` — `IgnorePkg = linux-lts linux-lts-headers` (kernel pinned to 6.12)
+- `/etc/pacman.conf` — `IgnorePkg = linux-lts linux-lts-headers` (kernel pinned to 6.12); add nvidia packages after downgrade
 - `/etc/docker/daemon.json` — nvidia default runtime
-- `/usr/src/nvidia-565.77/Kbuild` — was patched with `-Wno-error=incompatible-pointer-types` (no longer relevant, driver is now 610)
