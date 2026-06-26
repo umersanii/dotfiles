@@ -13,6 +13,7 @@ import qs.modules.ii.sidebarRight.quickToggles
 import qs.modules.ii.sidebarRight.quickToggles.classicStyle
 
 import qs.modules.ii.sidebarRight.bluetoothDevices
+import qs.modules.ii.sidebarRight.hotspot
 import qs.modules.ii.sidebarRight.nightLight
 import qs.modules.ii.sidebarRight.volumeMixer
 import qs.modules.ii.sidebarRight.wifiNetworks
@@ -25,6 +26,7 @@ Item {
     property bool showAudioOutputDialog: false
     property bool showAudioInputDialog: false
     property bool showBluetoothDialog: false
+    property bool showHotspotDialog: false
     property bool showNightLightDialog: false
     property bool showWifiDialog: false
     property bool editMode: false
@@ -35,6 +37,7 @@ Item {
             if (!GlobalStates.sidebarRightOpen) {
                 root.showWifiDialog = false;
                 root.showBluetoothDialog = false;
+                root.showHotspotDialog = false;
                 root.showAudioOutputDialog = false;
                 root.showAudioInputDialog = false;
             }
@@ -173,6 +176,11 @@ Item {
         }
     }
 
+    ToggleDialog {
+        shownPropertyString: "showHotspotDialog"
+        dialog: HotspotDialog {}
+    }
+
     component ToggleDialog: Loader {
         id: toggleDialogLoader
         required property string shownPropertyString
@@ -223,6 +231,9 @@ Item {
             }
             function onOpenWifiDialog() {
                 root.showWifiDialog = true;
+            }
+            function onOpenHotspotDialog() {
+                root.showHotspotDialog = true;
             }
         }
     }

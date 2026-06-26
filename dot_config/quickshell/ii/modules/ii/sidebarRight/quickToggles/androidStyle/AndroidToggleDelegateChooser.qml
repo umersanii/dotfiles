@@ -19,6 +19,7 @@ DelegateChooser {
     signal openBluetoothDialog()
     signal openNightLightDialog()
     signal openWifiDialog()
+    signal openHotspotDialog()
 
     role: "type"
 
@@ -188,6 +189,9 @@ DelegateChooser {
         baseCellHeight: root.baseCellHeight
         cellSpacing: root.spacing
         cellSize: modelData.size
+        onOpenMenu: {
+            root.openHotspotDialog()
+        }
     } }
 
     DelegateChoice { roleValue: "network"; AndroidNetworkToggle {
