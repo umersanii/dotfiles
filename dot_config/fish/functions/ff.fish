@@ -1,10 +1,7 @@
 function ff
     clear
     # Play GIF in the background at top-left (Increased size)
-    kitty +kitten icat --loop=0 --align=left --place 45x30@0x0 /home/sani/Downloads/art.gif
-    
-    # Run fastfetch with a "ghost logo" (single space) to force padding
-    # --logo " " + --logo-type data-raw makes it think there's a logo
-    # --logo-width and --logo-padding-left push the text to the right (Adjusted for larger GIF)
+    kitty +kitten icat --loop=0 --align=left --place 50x34@0x6 /home/sani/Downloads/touch.jpg
+    printf '\033[H'  # reset cursor to top-left before fastfetch
     fastfetch --logo " " --logo-type data-raw --logo-width 50 --logo-height 30 --logo-padding-left 00
 end
