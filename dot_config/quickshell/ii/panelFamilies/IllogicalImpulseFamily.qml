@@ -24,6 +24,7 @@ import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
 import qs.modules.ii.workTodo
 import qs.modules.ii.claudeStats
+import qs.modules.ii.subtitles
 
 Scope {
     PanelLoader { extraCondition: !Config.options.bar.vertical; component: Bar {} }
@@ -48,4 +49,5 @@ Scope {
     PanelLoader { component: WallpaperSelector {} }
     PanelLoader { component: WorkTodoWindow {} }
     PanelLoader { component: ClaudeStatsWindow {} }
+    PanelLoader { component: SubtitlesOverlay {} }
 }
