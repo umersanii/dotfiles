@@ -28,7 +28,8 @@ Singleton {
         const d = new Date(isoString)
         if (isNaN(d.getTime())) return ""
         if (d.getTime() <= Date.now()) return ""
-        return d.toLocaleDateString([], { month: "short", day: "numeric" })
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        return months[d.getMonth()] + " " + d.getDate()
     }
 
     function parseUsage() {
