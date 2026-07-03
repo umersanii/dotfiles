@@ -66,8 +66,9 @@ StyledPopup {
                 StyledPopupValueRow {
                     icon: "event"
                     label: Translation.tr("Reset date:")
-                    value: ClaudeUsage.formatResetDate(ClaudeUsage.sevenDayResetsAt)
-                    visible: ClaudeUsage.formatResetDate(ClaudeUsage.sevenDayResetsAt) !== ""
+                    readonly property string _resetDate: ClaudeUsage.formatResetDate(ClaudeUsage.sevenDayResetsAt)
+                    value: _resetDate
+                    visible: _resetDate !== ""
                 }
             }
         }
