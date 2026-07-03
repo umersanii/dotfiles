@@ -372,6 +372,10 @@ Item { // Bar content region
                 }
 
 
+                DownloadIndicator {
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
                 UtilButtons {
                     visible: (Config.options.bar.verbose && root.useShortenedForm === 0)
                     Layout.alignment: Qt.AlignVCenter
