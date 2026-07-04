@@ -129,13 +129,15 @@ def check(p):
         lines=[l.strip() for l in tail.strip().split('\\n') if l.strip()]
         for l in reversed(lines):
             try:
-                t=json.loads(l).get('type','')
+                d=json.loads(l)
+                t=d.get('type','')
                 idle=t!='user'
+                asking=t=='assistant' and d.get('message',{}).get('stop_reason')=='tool_use'
                 mtime=int(os.path.getmtime(p)*1000)
-                return idle,mtime
+                return idle,mtime,asking
             except: continue
     except: pass
-    return False,0
+    return False,0,False
 def get_email(pid):
     if pid in _ecache: return _ecache[pid]
     try:
@@ -165,11 +167,12 @@ for f in glob.glob(base+'/sessions/*.json'):
             m=glob.glob(f'{base}/projects/*/{sid}.jsonl')
             jsonl=m[0] if m else None
         if jsonl:
-            idle,mtime=check(jsonl)
+            idle,mtime,asking=check(jsonl)
             s['working']=not idle
             s['idleSince']=mtime if idle else 0
+            s['asking']=asking
         else:
-            s['working']=False;s['idleSince']=0
+            s['working']=False;s['idleSince']=0;s['asking']=False
         s['email']=get_email(s.get('pid',0))
         result.append(s)
     except: pass
@@ -231,16 +234,19 @@ while p > 1 and p not in s:
                 onTriggered: statsRoot.nowMs = Date.now()
             }
 
-            // ── Session dot state: 0=working, 1=ready<5min, 2=stale ─────────
+            // ── Session dot state: 0=working, 1=ready<5min, 2=stale, 3=asking ─
             // Claude brand orange: #D97757
             readonly property color claudeColor: "#D97757"
+            readonly property color askingColor: "#4CAF50"
             function dotState(session) {
+                if (session?.asking ?? false) return 3
                 if (session?.working ?? false) return 0
                 const idleSince = session?.idleSince ?? 0
                 if (idleSince === 0) return 2
                 return (nowMs - idleSince) < 300000 ? 1 : 2
             }
             function dotColor(state) {
+                if (state === 3) return askingColor
                 if (state === 0) return claudeColor
                 if (state === 1) return Appearance.colors.colPrimary
                 return Appearance.colors.colOutline
