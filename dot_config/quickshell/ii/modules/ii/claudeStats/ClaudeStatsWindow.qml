@@ -116,7 +116,7 @@ Scope {
             Process {
                 id: sessionsProc
                 command: ["python3", "-c", "
-import json,glob,os,re,subprocess
+import json,glob,os,re,subprocess,time
 def to_proj(cwd): return re.sub(r'[^a-zA-Z0-9_]','-',cwd)
 try:
     _prev=json.load(open('/tmp/claude-sessions.json'))
@@ -131,9 +131,15 @@ def check(p):
             try:
                 d=json.loads(l)
                 t=d.get('type','')
-                idle=t!='user'
-                asking=t=='assistant' and d.get('message',{}).get('stop_reason')=='tool_use'
+                # a tool_use stop_reason means Claude is mid-turn (running a tool or
+                # waiting on a permission prompt) — NOT idle. Only a genuine final
+                # assistant reply (no pending tool call) counts as idle.
+                pending_tool=t=='assistant' and d.get('message',{}).get('stop_reason')=='tool_use'
+                idle=t=='assistant' and not pending_tool
                 mtime=int(os.path.getmtime(p)*1000)
+                # give fast/auto-approved tool calls a grace period before treating
+                # a stuck tool_use as \"waiting on you\" (green) instead of \"working\"
+                asking=pending_tool and (int(time.time()*1000)-mtime) > 8000
                 return idle,mtime,asking
             except: continue
     except: pass
