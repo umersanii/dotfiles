@@ -1082,7 +1082,7 @@ while p > 1 and p not in s:
                         // ╚══════════════════════════════════════════════════╝
                         Item {
                             implicitWidth:  swipeView.width
-                            implicitHeight: modelsCol.implicitHeight + 20
+                            implicitHeight: modelsCol.implicitHeight
 
                             ColumnLayout {
                                 id: modelsCol
@@ -1169,7 +1169,7 @@ while p > 1 and p not in s:
                         // ╚══════════════════════════════════════════════════╝
                         Item {
                             implicitWidth:  swipeView.width
-                            implicitHeight: sessionCol.implicitHeight + 20
+                            implicitHeight: sessionCol.implicitHeight
 
                             ColumnLayout {
                                 id: sessionCol
