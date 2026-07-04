@@ -135,7 +135,7 @@ def check(p):
                 # waiting on a permission prompt) — NOT idle. Only a genuine final
                 # assistant reply (no pending tool call) counts as idle.
                 pending_tool=t=='assistant' and d.get('message',{}).get('stop_reason')=='tool_use'
-                idle=t=='assistant' and not pending_tool
+                idle=(t!='user') and not pending_tool
                 mtime=int(os.path.getmtime(p)*1000)
                 # give fast/auto-approved tool calls a grace period before treating
                 # a stuck tool_use as \"waiting on you\" (green) instead of \"working\"
