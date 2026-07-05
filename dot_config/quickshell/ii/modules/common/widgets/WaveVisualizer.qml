@@ -22,6 +22,9 @@ Canvas { // Visualizer
     onPointsChanged: () => {
         root.requestPaint()
     }
+    onColorChanged: () => {
+        root.requestPaint()
+    }
 
     anchors.fill: parent
     onPaint: {
