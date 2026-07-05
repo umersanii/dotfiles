@@ -10,7 +10,7 @@ CAVA_CONFIG    = os.path.expanduser("~/.config/cava/config")
 PLAYERS        = "firefox,edge,chromium,chrome"
 ART_CACHE      = os.path.expanduser("~/.cache/cava-colors/art")
 KEY_COLOR_FILE = "/tmp/cava-key-color"
-DEFAULT        = ["#3a3a3a", "#4d4d4d", "#606060", "#747474", "#888888", "#9b9b9b", "#aeaeae", "#c2c2c2", "#ffffff"]
+DEFAULT        = ["#ffffff", "#c2c2c2", "#aeaeae", "#9b9b9b", "#888888", "#747474", "#606060", "#4d4d4d"]
 DEFAULT_KEY    = "888888"
 
 os.makedirs(os.path.dirname(ART_CACHE), exist_ok=True)
@@ -82,12 +82,12 @@ def pick_key(colors):
 
 
 def build_gradient(h, s, v, steps=8):
-    """Smooth dark-to-bright gradient preserving the key hue."""
+    """Gradient from white (bottom, gradient_color_1) to the key color (top, last stop)."""
     out = []
     for i in range(steps):
-        t  = i / (steps - 1)
-        vi = 0.48 + t * 0.30          # brightness 0.48 → 0.78  (narrow range = subtle)
-        si = s * (0.75 + t * 0.20)   # saturation 75% → 95% of key  (stays consistent)
+        t  = i / (steps - 1)          # 0 = bottom (white) -> 1 = top (key color)
+        si = s * t                    # saturation: 0 (white) -> s (full key color)
+        vi = 1.0 - t * (1.0 - v)      # brightness: 1.0 (white) -> v (key color)
         r, g, b = colorsys.hsv_to_rgb(h, min(si, 1.0), min(vi, 1.0))
         out.append("#{:02x}{:02x}{:02x}".format(int(r*255), int(g*255), int(b*255)))
     return out
@@ -144,11 +144,9 @@ def main():
                     if key:
                         h, s, v = key
                         gradient = build_gradient(h, s, v)
-                        gradient.append("#ffffff")
                         apply_gradient(gradient)
-                        # Write middle stop as key color for other processes
-                        mid = gradient[len(gradient) // 2].lstrip("#")
-                        write_key_color(mid)
+                        # Write the actual key color (top stop) for other processes
+                        write_key_color(gradient[-1].lstrip("#"))
                     else:
                         apply_gradient(DEFAULT)
                         write_key_color(DEFAULT_KEY)
