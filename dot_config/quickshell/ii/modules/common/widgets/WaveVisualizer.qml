@@ -98,7 +98,7 @@ Canvas { // Visualizer
     layer.enabled: true
     layer.effect: MultiEffect { // Blur a bit to obscure away the points
         source: root
-        saturation: 0.2
+        saturation: 1.0
         blurEnabled: true
         blurMax: 7
         blur: 1
