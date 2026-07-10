@@ -40,6 +40,9 @@ echo "$(date '+%H:%M:%S') Launching cava-colors..." >> "$DBG"
 python3 ~/.config/hypr/hyprland/scripts/cava-colors.py &
 echo "$(date '+%H:%M:%S') Launching keyboard-music-sync..." >> "$DBG"
 python3 ~/.config/hypr/hyprland/scripts/keyboard-music-sync.py &
+echo "$(date '+%H:%M:%S') Launching cava (raw output, no terminal)..." >> "$DBG"
+rm -f /tmp/cava-dashboard.fifo
+cava &
 echo "$(date '+%H:%M:%S') Launching muser..." >> "$DBG"
 muser &
 MUSER_PID=$!
