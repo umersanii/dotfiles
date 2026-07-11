@@ -1,28 +1,23 @@
 #!/bin/bash
-# Toggle music-sptlrx panel between sptlrx-scaled (lyrics) and cmatrix (matrix)
-MODE_FILE="/tmp/music-visual-mode"
+# Toggle the dashboard's lyrics card between lyrics and matrix (digital-rain) mode.
+# The card itself renders both modes client-side; this just pings the running
+# dashboard's API, which flips the mode and broadcasts it over the websocket.
 
-# Only operate when dashboard is open
-if ! hyprctl clients -j 2>/dev/null | python3 -c "
-import json, sys
-sys.exit(0 if any(c['class'] in ('music-cava', 'music-sptlrx') for c in json.load(sys.stdin)) else 1)
-" 2>/dev/null; then
+# Only operate when the dashboard is open
+if ! pgrep -f "standalone_app.py" > /dev/null 2>&1; then
     exit 0
 fi
 
-current=$(cat "$MODE_FILE" 2>/dev/null || echo "lyrics")
+port=$(cat /tmp/muser-port 2>/dev/null)
+if [ -z "$port" ]; then
+    exit 0
+fi
 
-hyprctl dispatch closewindow "class:music-sptlrx" 2>/dev/null
-sleep 0.15
+response=$(curl -s -X POST "http://127.0.0.1:${port}/api/toggle-visual")
+mode=$(echo "$response" | python3 -c "import json,sys; print(json.load(sys.stdin).get('mode','lyrics'))" 2>/dev/null)
 
-if [ "$current" = "lyrics" ]; then
-    pkill -f sptlrx-scaled 2>/dev/null
-    kitty --class music-sptlrx -e ~/.config/hypr/hyprland/scripts/cmatrix-themed.sh &
-    echo "matrix" > "$MODE_FILE"
+if [ "$mode" = "matrix" ]; then
     notify-send -a "Music Dashboard" -i audio-headphones "Visual: Matrix" -t 1200
 else
-    pkill -x cmatrix 2>/dev/null
-    kitty --class music-sptlrx -e "$HOME/.local/bin/sptlrx-scaled" &
-    echo "lyrics" > "$MODE_FILE"
     notify-send -a "Music Dashboard" -i audio-headphones "Visual: Lyrics" -t 1200
 fi
