@@ -33,7 +33,49 @@ def get_art_url():
     return run(["playerctl", f"--player={PLAYERS}", "metadata", "mpris:artUrl"])
 
 
+def get_track_url():
+    return run(["playerctl", f"--player={PLAYERS}", "metadata", "xesam:url"])
+
+
+_YT_ID_PATTERNS = [
+    re.compile(r'(?:youtube\.com|music\.youtube\.com)/watch\?.*?v=([\w-]{11})'),
+    re.compile(r'youtu\.be/([\w-]{11})'),
+    re.compile(r'youtube\.com/(?:shorts|embed)/([\w-]{11})'),
+    re.compile(r'ytimg\.com/vi(?:_webp)?/([\w-]{11})/'),
+]
+
+def extract_youtube_id(*urls):
+    for url in urls:
+        if not url:
+            continue
+        for pattern in _YT_ID_PATTERNS:
+            m = pattern.search(url)
+            if m:
+                return m.group(1)
+    return None
+
+
+def fetch_youtube_thumbnail(video_id):
+    """Download the best available ytimg thumbnail; returns path or None."""
+    for quality in ("maxresdefault", "sddefault", "hqdefault"):
+        try:
+            url = f"https://i.ytimg.com/vi/{video_id}/{quality}.jpg"
+            urllib.request.urlretrieve(url, ART_CACHE)
+            # missing sizes come back as a tiny placeholder image
+            if os.path.getsize(ART_CACHE) > 2000:
+                return ART_CACHE
+        except Exception:
+            continue
+    return None
+
+
 def fetch_art(url):
+    # YouTube thumbnail is the canonical art source across muser
+    video_id = extract_youtube_id(get_track_url(), url)
+    if video_id:
+        art = fetch_youtube_thumbnail(video_id)
+        if art:
+            return art
     if not url:
         return None
     try:
