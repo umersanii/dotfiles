@@ -8,6 +8,7 @@ import subprocess, re, colorsys, os, sys, time, signal, shutil, urllib.request
 
 CAVA_CONFIG    = os.path.expanduser("~/.config/cava/config")
 PLAYERS        = "firefox,edge,chromium,chrome"
+MUSIC_URL      = "music.youtube.com"   # only respond to YouTube Music
 ART_CACHE      = os.path.expanduser("~/.cache/cava-colors/art")
 KEY_COLOR_FILE = "/tmp/cava-key-color"
 DEFAULT        = ["#ffffff", "#c2c2c2", "#aeaeae", "#9b9b9b", "#888888", "#747474", "#606060", "#4d4d4d"]
@@ -178,7 +179,12 @@ def main():
     while True:
         title = get_title()
         art_url = get_art_url()
-        vid = extract_youtube_id(get_track_url(), art_url)
+        track_url = get_track_url()
+        vid = extract_youtube_id(track_url, art_url)
+
+        # A plain YouTube tab exposes the same MPRIS player, so gate on the URL
+        if title and track_url and MUSIC_URL not in track_url:
+            title, vid = None, None
 
         # On song change Firefox updates the title before the track/art URL, so
         # keying on title alone can extract colors from the *previous* video's
