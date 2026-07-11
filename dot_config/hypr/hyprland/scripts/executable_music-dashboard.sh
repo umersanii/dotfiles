@@ -66,11 +66,13 @@ fi
 # bar is running (waybar/quickshell reserve space via exclusive zones)
 GEOM=$(hyprctl monitors -j | python3 -c "
 import json, sys
-m = json.load(sys.stdin)[0]
+mons = json.load(sys.stdin)
+m = next((m for m in mons if m.get('focused')), mons[0])
 lw, lh = m['width'] / m['scale'], m['height'] / m['scale']
 left, top, right, bottom = m['reserved']
 margin = 8
-print(int(left + margin), int(top + margin),
+# movewindowpixel uses global layout coords, so offset by the monitor position
+print(int(m['x'] + left + margin), int(m['y'] + top + margin),
       int(lw - left - right - 2 * margin), int(lh - top - bottom - 2 * margin))
 ")
 read -r WX WY WW WH <<< "$GEOM"
