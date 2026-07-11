@@ -77,8 +77,8 @@ read -r WX WY WW WH <<< "$GEOM"
 echo "$(date '+%H:%M:%S') Applying geometry ${WW}x${WH} at ${WX},${WY}" >> "$DBG"
 for _ in $(seq 1 50); do
     if hyprctl clients -j 2>/dev/null | grep -q "Music Player"; then
-        hyprctl dispatch resizewindowpixel "exact $WW $WH,title:Music Player" >/dev/null
-        hyprctl dispatch movewindowpixel "exact $WX $WY,title:Music Player" >/dev/null
+        hyprctl dispatch resizewindowpixel "exact $WW $WH,title:.*Music Player.*" >/dev/null
+        hyprctl dispatch movewindowpixel "exact $WX $WY,title:.*Music Player.*" >/dev/null
         break
     fi
     sleep 0.2
