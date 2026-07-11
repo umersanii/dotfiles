@@ -1,0 +1,8 @@
+[config]
+version_check = false
+
+# Minimal config for music-theme-sync: renders only the live quickshell
+# palette so a music accent apply doesn't touch GTK/KDE/hyprland/fuzzel/etc.
+[templates.m3colors_live]
+input_path = '~/.config/matugen/templates/colors-live.json'
+output_path = '~/.local/state/quickshell/user/generated/colors-live.json'
