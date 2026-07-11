@@ -18,6 +18,7 @@ close_all() {
     pkill -x cava 2>/dev/null
     pkill -f "cava-colors.py" 2>/dev/null
     pkill -f "keyboard-music-sync.py" 2>/dev/null
+    pkill -f "music-theme-sync.sh" 2>/dev/null   # SIGTERM -> restores base theme
 }
 
 if is_running; then
@@ -40,6 +41,8 @@ echo "$(date '+%H:%M:%S') Launching cava-colors..." >> "$DBG"
 python3 ~/.config/hypr/hyprland/scripts/cava-colors.py &
 echo "$(date '+%H:%M:%S') Launching keyboard-music-sync..." >> "$DBG"
 python3 ~/.config/hypr/hyprland/scripts/keyboard-music-sync.py &
+echo "$(date '+%H:%M:%S') Launching music-theme-sync..." >> "$DBG"
+bash ~/.config/hypr/hyprland/scripts/music-theme-sync.sh &
 echo "$(date '+%H:%M:%S') Launching cava (raw output, no terminal)..." >> "$DBG"
 rm -f /tmp/cava-dashboard.fifo
 cava &
