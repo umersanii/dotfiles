@@ -103,6 +103,23 @@ Singleton {
     })
 
 
+    // Colored accent region per weather icon. The cloud part of the glyph keeps
+    // the base color; only the region below (drops, snow, bolt) or the sun/moon
+    // gets tinted. rect = [x, y, w, h] as fractions of the glyph bounding box;
+    // omit rect to tint the whole glyph (sun/moon icons with no cloud).
+    readonly property var weatherAccentMap: ({
+        "clear_day": { color: "#ffb300" },
+        "clear_night": { color: "#9fa8da" },
+        "partly_cloudy_day": { color: "#ffb300", rect: [0.45, 0, 0.55, 0.48] },
+        "partly_cloudy_night": { color: "#9fa8da", rect: [0.45, 0, 0.55, 0.48] },
+        "rainy": { color: "#4fc3f7", rect: [0, 0.55, 1, 0.45] },
+        "weather_hail": { color: "#29b6f6", rect: [0, 0.55, 1, 0.45] },
+        "snowing": { color: "#81d4fa", rect: [0, 0.55, 1, 0.45] },
+        "cloudy_snowing": { color: "#81d4fa", rect: [0, 0.55, 1, 0.45] },
+        "snowing_heavy": { color: "#81d4fa", rect: [0, 0.55, 1, 0.45] },
+        "thunderstorm": { color: "#ffd54f", rect: [0, 0.5, 1, 0.5] }
+    })
+
     function getWeatherIcon(code, isDay) {
         const key = String(code)
         if (weatherIconMap.hasOwnProperty(key)) {
