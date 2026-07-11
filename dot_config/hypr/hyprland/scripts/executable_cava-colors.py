@@ -91,36 +91,40 @@ def fetch_art(url):
         return None
 
 
-def extract_colors(path, n=8):
-    """Return list of (h, s, v) for the n dominant colors via ImageMagick."""
+def extract_colors(path, n=12):
+    """Return list of (pixel_count, (h, s, v)) for the n dominant colors via ImageMagick."""
     try:
         raw = subprocess.check_output(
             ["magick", path, "-resize", "150x150", "-colors", str(n),
-             "-unique-colors", "txt:-"],
+             "-format", "%c", "histogram:info:-"],
             stderr=subprocess.DEVNULL
         ).decode()
     except Exception:
         return []
 
     result = []
-    for line in raw.splitlines()[1:]:          # skip ImageMagick header
-        m = re.search(r"#([0-9A-Fa-f]{6})", line)
+    for line in raw.splitlines():
+        m = re.search(r"(\d+):.*?#([0-9A-Fa-f]{6})", line)
         if m:
-            h6 = m.group(1)
+            count = int(m.group(1))
+            h6 = m.group(2)
             r, g, b = (int(h6[i:i+2], 16) / 255 for i in (0, 2, 4))
-            result.append(colorsys.rgb_to_hsv(r, g, b))
+            result.append((count, colorsys.rgb_to_hsv(r, g, b)))
     return result
 
 
 def pick_key(colors):
-    """Pick most vibrant color. Returns None for grayscale art so caller uses default."""
+    """Pick the dominant vibrant color, weighting coverage (pixel count) as well as
+    vibrance so a tiny saturated fleck can't outvote the art's actual color.
+    Returns None for grayscale art so caller uses default."""
     if not colors:
         return None
-    # Only consider colors with genuine saturation — filters out JPEG artifacts
-    saturated = [c for c in colors if c[1] > 0.30]
+    # Only consider colors with genuine saturation and brightness — filters out
+    # JPEG artifacts, letterbox bars, and near-black backgrounds
+    saturated = [(cnt, c) for cnt, c in colors if c[1] > 0.30 and c[2] > 0.20]
     if not saturated:
         return None     # grayscale/monochrome art → caller will use default gradient
-    return max(saturated, key=lambda c: c[1] * c[2])
+    return max(saturated, key=lambda e: e[0] * e[1][1] * e[1][2])[1]
 
 
 def build_gradient(h, s, v, steps=8):
