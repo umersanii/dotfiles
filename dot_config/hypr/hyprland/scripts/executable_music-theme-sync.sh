@@ -13,11 +13,27 @@ KEY_FILE=/tmp/cava-key-color
 BASE_FILE="$HOME/.cache/muser/base-accent"
 SWITCHWALL="$HOME/.config/quickshell/ii/scripts/colors/switchwall.sh"
 SHELL_CONFIG="$HOME/.config/illogical-impulse/config.json"
+GEN_DIR="$HOME/.local/state/quickshell/user/generated"
 DEFAULT_KEY=888888
+
+# switchwall sources the quickshell venv; make sure the var exists even when
+# launched outside a full Hyprland env
+export ILLOGICAL_IMPULSE_VIRTUAL_ENV="${ILLOGICAL_IMPULSE_VIRTUAL_ENV:-$HOME/.local/state/quickshell/.venv}"
 
 mkdir -p "$(dirname "$BASE_FILE")"
 
-apply() {
+# The quickshell bar reads colors.json, whose matugen template is hardcoded
+# to the white base theme. matugen also renders colors-live.json (real
+# placeholders), so for music colors we swap that in; restoring the base
+# accent regenerates the hardcoded white colors.json on its own.
+apply_music() {
+    "$SWITCHWALL" --noswitch --color "$1" >/dev/null 2>&1
+    if [ -s "$GEN_DIR/colors-live.json" ]; then
+        cp "$GEN_DIR/colors-live.json" "$GEN_DIR/colors.json"
+    fi
+}
+
+apply_base() {
     "$SWITCHWALL" --noswitch --color "$1" >/dev/null 2>&1
 }
 
@@ -35,7 +51,7 @@ save_base() {
 
 restore_base() {
     [ -f "$BASE_FILE" ] || return
-    apply "$(cat "$BASE_FILE")"
+    apply_base "$(cat "$BASE_FILE")"
     rm -f "$BASE_FILE"
 }
 
@@ -60,7 +76,7 @@ while true; do
                 restore_base
             else
                 save_base
-                apply "#$color"
+                apply_music "#$color"
             fi
         fi
     fi

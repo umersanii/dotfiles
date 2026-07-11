@@ -186,11 +186,17 @@ def main():
         if title and track_url and MUSIC_URL not in track_url:
             title, vid = None, None
 
+        # Firefox swaps the MPRIS art file (new filename each time) shortly
+        # after the title updates; including art_url in the key means a
+        # placeholder-then-real-art sequence triggers a reprocess instead of
+        # sticking with the placeholder's colors.
+        cur_key = (title, vid, art_url)
+
         # On song change Firefox updates the title before the track/art URL, so
         # keying on title alone can extract colors from the *previous* video's
         # thumbnail and never recover. Key on (title, video id) instead, and give
         # the URL a few seconds to catch up before computing.
-        if (title, vid) != last_key and title and vid is not None and vid == last_vid:
+        if cur_key != last_key and title and vid is not None and vid == last_vid:
             if pending_since is None:
                 pending_since = time.time()
             if time.time() - pending_since < 6:
@@ -198,8 +204,8 @@ def main():
                 continue
         pending_since = None
 
-        if (title, vid) != last_key:
-            last_key = (title, vid)
+        if cur_key != last_key:
+            last_key = cur_key
             last_vid = vid
 
             if not title:

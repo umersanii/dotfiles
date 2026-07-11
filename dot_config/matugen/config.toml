@@ -5,6 +5,12 @@ version_check = false
 input_path = '~/.config/matugen/templates/colors.json'
 output_path = '~/.local/state/quickshell/user/generated/colors.json'
 
+# Real (non-hardcoded) palette for music-theme-sync; colors.json above stays
+# the hardcoded white base that quickshell reads by default
+[templates.m3colors_live]
+input_path = '~/.config/matugen/templates/colors-live.json'
+output_path = '~/.local/state/quickshell/user/generated/colors-live.json'
+
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland/colors.conf'
 output_path = '~/.config/hypr/hyprland/colors.conf'
