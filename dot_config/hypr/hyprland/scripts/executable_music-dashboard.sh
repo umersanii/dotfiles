@@ -61,4 +61,26 @@ if pgrep -f "[s]tandalone_app.py" > /dev/null 2>&1; then
 else
     echo "$(date '+%H:%M:%S') standalone_app.py NOT running!" >> "$DBG"
 fi
+
+# Fit the window inside the monitor's non-reserved area so it clears whatever
+# bar is running (waybar/quickshell reserve space via exclusive zones)
+GEOM=$(hyprctl monitors -j | python3 -c "
+import json, sys
+m = json.load(sys.stdin)[0]
+lw, lh = m['width'] / m['scale'], m['height'] / m['scale']
+left, top, right, bottom = m['reserved']
+margin = 8
+print(int(left + margin), int(top + margin),
+      int(lw - left - right - 2 * margin), int(lh - top - bottom - 2 * margin))
+")
+read -r WX WY WW WH <<< "$GEOM"
+echo "$(date '+%H:%M:%S') Applying geometry ${WW}x${WH} at ${WX},${WY}" >> "$DBG"
+for _ in $(seq 1 50); do
+    if hyprctl clients -j 2>/dev/null | grep -q "Music Player"; then
+        hyprctl dispatch resizewindowpixel "exact $WW $WH,title:Music Player" >/dev/null
+        hyprctl dispatch movewindowpixel "exact $WX $WY,title:Music Player" >/dev/null
+        break
+    fi
+    sleep 0.2
+done
 echo "$(date '+%H:%M:%S') === Script done ===" >> "$DBG"
