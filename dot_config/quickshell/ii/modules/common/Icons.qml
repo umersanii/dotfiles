@@ -103,21 +103,25 @@ Singleton {
     })
 
 
-    // Colored accent region per weather icon. The cloud part of the glyph keeps
-    // the base color; only the region below (drops, snow, bolt) or the sun/moon
-    // gets tinted. rect = [x, y, w, h] as fractions of the glyph bounding box;
-    // omit rect to tint the whole glyph (sun/moon icons with no cloud).
-    readonly property var weatherAccentMap: ({
+    // Composite weather icons: a plain cloud glyph in the base color with a
+    // small colored accent glyph (drop, snowflake, bolt, sun) placed next to it,
+    // Google Weather style. `color` alone (no accent) tints the whole glyph —
+    // used for cloudless sun/moon icons.
+    // accent: { icon, color, size, cx, cy, fill, behind }
+    //   size = accent icon size as fraction of the main icon size
+    //   cx/cy = accent center as fractions of the glyph bounding box
+    //   behind = draw accent behind the cloud (sun/moon peeking out)
+    readonly property var weatherComposeMap: ({
         "clear_day": { color: "#ffb300" },
         "clear_night": { color: "#9fa8da" },
-        "partly_cloudy_day": { color: "#ffb300", rect: [0.45, 0, 0.55, 0.48] },
-        "partly_cloudy_night": { color: "#9fa8da", rect: [0.45, 0, 0.55, 0.48] },
-        "rainy": { color: "#4fc3f7", rect: [0, 0.55, 1, 0.45] },
-        "weather_hail": { color: "#29b6f6", rect: [0, 0.55, 1, 0.45] },
-        "snowing": { color: "#81d4fa", rect: [0, 0.55, 1, 0.45] },
-        "cloudy_snowing": { color: "#81d4fa", rect: [0, 0.55, 1, 0.45] },
-        "snowing_heavy": { color: "#81d4fa", rect: [0, 0.55, 1, 0.45] },
-        "thunderstorm": { color: "#ffd54f", rect: [0, 0.5, 1, 0.5] }
+        "partly_cloudy_day": { base: "cloud", accent: { icon: "clear_day", color: "#ffb300", size: 0.55, cx: 0.74, cy: 0.26, fill: 1, behind: true } },
+        "partly_cloudy_night": { base: "cloud", accent: { icon: "clear_night", color: "#9fa8da", size: 0.55, cx: 0.74, cy: 0.26, fill: 1, behind: true } },
+        "rainy": { base: "cloud", accent: { icon: "water_drop", color: "#4fc3f7", size: 0.42, cx: 0.58, cy: 0.86, fill: 1 } },
+        "weather_hail": { base: "cloud", accent: { icon: "water_drop", color: "#29b6f6", size: 0.42, cx: 0.58, cy: 0.86, fill: 1 } },
+        "snowing": { base: "cloud", accent: { icon: "ac_unit", color: "#81d4fa", size: 0.45, cx: 0.58, cy: 0.86, fill: 0 } },
+        "cloudy_snowing": { base: "cloud", accent: { icon: "ac_unit", color: "#81d4fa", size: 0.45, cx: 0.58, cy: 0.86, fill: 0 } },
+        "snowing_heavy": { base: "cloud", accent: { icon: "ac_unit", color: "#b3e5fc", size: 0.5, cx: 0.56, cy: 0.87, fill: 0 } },
+        "thunderstorm": { base: "cloud", accent: { icon: "bolt", color: "#ffd54f", size: 0.5, cx: 0.56, cy: 0.85, fill: 1 } }
     })
 
     function getWeatherIcon(code, isDay) {
