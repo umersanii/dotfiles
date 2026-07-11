@@ -43,8 +43,21 @@ apply_term() {
 
   sed -i "s/\$alpha/$term_alpha/g" "$STATE_DIR/user/generated/terminal/sequences.txt"
 
+  # Kitty keeps its own static theme: collect the pts indices kitty owns
+  # (via the tty-index of its ptmx fds) and skip them below
+  local kitty_pts=" "
+  local pid fd idx
+  for pid in $(pgrep -x kitty); do
+    for fd in /proc/"$pid"/fd/*; do
+      if [[ "$(readlink "$fd" 2>/dev/null)" == /dev/ptmx ]]; then
+        idx=$(awk '/tty-index:/ {print $2}' /proc/"$pid"/fdinfo/"${fd##*/}" 2>/dev/null)
+        [[ -n "$idx" ]] && kitty_pts+="/dev/pts/$idx "
+      fi
+    done
+  done
+
   for file in /dev/pts/*; do
-    if [[ $file =~ ^/dev/pts/[0-9]+$ ]]; then
+    if [[ $file =~ ^/dev/pts/[0-9]+$ && "$kitty_pts" != *" $file "* ]]; then
       {
       cat "$STATE_DIR"/user/generated/terminal/sequences.txt >"$file"
       } & disown || true
