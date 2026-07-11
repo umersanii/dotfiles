@@ -69,9 +69,8 @@ def fetch_youtube_thumbnail(video_id):
     return None
 
 
-def fetch_art(url):
+def fetch_art(video_id, url):
     # YouTube thumbnail is the canonical art source across muser
-    video_id = extract_youtube_id(get_track_url(), url)
     if video_id:
         art = fetch_youtube_thumbnail(video_id)
         if art:
@@ -172,19 +171,36 @@ signal.signal(signal.SIGINT,  cleanup)
 
 
 def main():
-    last_title = object()   # sentinel so first iteration always fires
+    last_key = object()     # sentinel so first iteration always fires
+    last_vid = None
+    pending_since = None    # title changed but MPRIS url still points at the old video
 
     while True:
         title = get_title()
+        art_url = get_art_url()
+        vid = extract_youtube_id(get_track_url(), art_url)
 
-        if title != last_title:
-            last_title = title
+        # On song change Firefox updates the title before the track/art URL, so
+        # keying on title alone can extract colors from the *previous* video's
+        # thumbnail and never recover. Key on (title, video id) instead, and give
+        # the URL a few seconds to catch up before computing.
+        if (title, vid) != last_key and title and vid is not None and vid == last_vid:
+            if pending_since is None:
+                pending_since = time.time()
+            if time.time() - pending_since < 6:
+                time.sleep(0.5)
+                continue
+        pending_since = None
+
+        if (title, vid) != last_key:
+            last_key = (title, vid)
+            last_vid = vid
 
             if not title:
                 apply_gradient(DEFAULT)
                 write_key_color(DEFAULT_KEY)
             else:
-                art = fetch_art(get_art_url())
+                art = fetch_art(vid, art_url)
                 if art:
                     key = pick_key(extract_colors(art))
                     if key:
