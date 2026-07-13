@@ -24,34 +24,35 @@ AbstractBackgroundWidget {
         anchors.fill: parent
         shape: MaterialShape.Shape.Pill
         color: Appearance.colors.colPrimaryContainer
-        implicitSize: 200
+        implicitSize: 210
 
         StyledText {
+            textFormat: Text.StyledText
             font {
-                pixelSize: 80
+                pixelSize: 66
                 family: Appearance.font.family.expressive
                 weight: Font.Medium
             }
             color: Appearance.colors.colPrimary
-            text: Weather.data?.temp.substring(0,Weather.data?.temp.length - 1) ?? "--°"
+            text: (Weather.data?.temp.substring(0,Weather.data?.temp.length - 2) ?? "--") + "<span style=\"vertical-align:super;font-size:55%\">°</span>"
             anchors {
                 right: parent.right
                 top: parent.top
-                rightMargin: 16
-                topMargin: 20
+                rightMargin: 26
+                topMargin: 38
             }
         }
 
         WeatherSymbol {
-            iconSize: 80
+            iconSize: 58
             baseColor: Appearance.colors.colOnPrimaryContainer
             icon: Icons.getWeatherIcon(Weather.data.wCode, Weather.data.isDay) ?? "cloud"
             anchors {
                 left: parent.left
                 bottom: parent.bottom
 
-                leftMargin: 16
-                bottomMargin: 20
+                leftMargin: 26
+                bottomMargin: 32
             }
         }
     }
