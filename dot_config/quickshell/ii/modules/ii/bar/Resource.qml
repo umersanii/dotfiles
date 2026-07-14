@@ -1,7 +1,9 @@
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 Item {
     id: root
@@ -19,13 +21,9 @@ Item {
     readonly property color colActive: root.warning
         ? Qt.rgba(0xEF/255, 0x44/255, 0x44/255, 1.0)
         : Appearance.colors.colOnLayer1
-    // Accent-hued progress arc, lightness clamped dark so it always reads
-    // against the white circle fill (white accent desaturates to dark gray)
-    readonly property color colArc: root.warning
-        ? "black"
-        : Qt.hsla(Appearance.colors.colPrimary.hslHue,
-                  Appearance.colors.colPrimary.hslSaturation,
-                  0.32, 1)
+    readonly property color colAccentDark: "black"
+    // Light tint of the accent hue, forced light regardless of dark/light mode
+    readonly property color colDiscBackground: ColorUtils.colorWithLightness(Appearance.colors.colPrimary, 0.85)
 
     RowLayout {
         id: resourceRowLayout
@@ -41,7 +39,7 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: percentage
             implicitSize: 21
-            colPrimary: root.colArc
+            colPrimary: root.colDiscBackground
             colSecondary: root.colActive
             accountForLightBleeding: !root.warning
             enableAnimation: true
@@ -64,20 +62,29 @@ Item {
                         iconSize: parent.height
                         antialiasing: true
                         renderType: Text.QtRendering
-                        color: "black"
+                        color: root.colAccentDark
                     }
                 }
                 Component {
                     id: imgIcon
-                    Image {
-                        width: parent.width
-                        height: parent.height
-                        source: root.iconSource
-                        sourceSize.width: parent.width
-                        sourceSize.height: parent.height
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        antialiasing: true
+                    Item {
+                        Image {
+                            id: img
+                            anchors.fill: parent
+                            source: root.iconSource
+                            sourceSize.width: width
+                            sourceSize.height: height
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            antialiasing: true
+                            visible: false
+                        }
+                        // Tint image icons with the same accent as symbol icons
+                        ColorOverlay {
+                            anchors.fill: img
+                            source: img
+                            color: root.colAccentDark
+                        }
                     }
                 }
             }

@@ -75,7 +75,7 @@ Item {
                     fill: 1
                     text: "colorize"
                     iconSize: Appearance.font.pixelSize.large
-                    color: "black"
+                    color: Appearance.colors.colOnLayer2
                 }
             }
         }
@@ -91,7 +91,7 @@ Item {
                     fill: 0
                     text: "keyboard"
                     iconSize: Appearance.font.pixelSize.large
-                    color: "black"
+                    color: Appearance.colors.colOnLayer2
                 }
             }
         }
@@ -107,7 +107,7 @@ Item {
                     fill: 0
                     text: Pipewire.defaultAudioSource?.audio?.muted ? "mic_off" : "mic"
                     iconSize: Appearance.font.pixelSize.large
-                    color: "black"
+                    color: Appearance.colors.colOnLayer2
                 }
             }
         }
@@ -129,7 +129,7 @@ Item {
                     fill: 0
                     text: Appearance.m3colors.darkmode ? "light_mode" : "dark_mode"
                     iconSize: Appearance.font.pixelSize.large
-                    color: "black"
+                    color: Appearance.colors.colOnLayer2
                 }
             }
         }
