@@ -15,4 +15,8 @@ RippleButton {
     // Enable borders on utility buttons
     borderWidth: 1
     borderColor: Appearance.colors.colOutlineVariant
+
+    // Light accent-tinted background instead of the default layer color
+    colBackground: Appearance.colors.colPrimaryContainer
+    colBackgroundHover: Appearance.colors.colPrimaryContainerHover
 }
