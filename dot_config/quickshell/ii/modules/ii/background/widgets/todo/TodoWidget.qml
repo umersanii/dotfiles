@@ -131,7 +131,12 @@ AbstractBackgroundWidget {
                                     Layout.alignment: Qt.AlignTop
                                     text: parent.parent.modelData.done ? "check_circle" : "radio_button_unchecked"
                                     iconSize: Appearance.font.pixelSize.normal
-                                    color: parent.parent.modelData.done ? Appearance.colors.colPrimary : root.needsColText ? root.colText : Appearance.colors.colOnSurfaceVariant
+                                    // Light accent hue for pending bullets
+                                    color: parent.parent.modelData.done
+                                        ? Appearance.colors.colPrimary
+                                        : Qt.hsla(Appearance.colors.colPrimary.hslHue,
+                                                  Appearance.colors.colPrimary.hslSaturation,
+                                                  0.72, 1)
                                 }
 
                                 // Text
