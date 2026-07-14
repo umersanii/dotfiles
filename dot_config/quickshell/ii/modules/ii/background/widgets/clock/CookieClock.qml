@@ -20,9 +20,11 @@ Item {
     property real implicitSize: 230
 
     property color colShadow: Appearance.colors.colShadow
-    property color colBackground: Appearance.colors.colPrimaryContainer
-    property color colOnBackground: ColorUtils.mix(Appearance.colors.colSecondary, Appearance.colors.colPrimaryContainer, 0.15)
-    property color colBackgroundInfo: ColorUtils.mix(Appearance.colors.colPrimary, Appearance.colors.colPrimaryContainer, 0.55)
+    // Neutral surface so the music accent merge never floods the whole blob;
+    // accents live in the hands, text and info marks only
+    property color colBackground: Appearance.colors.colSurfaceContainerHigh
+    property color colOnBackground: ColorUtils.mix(Appearance.colors.colSecondary, colBackground, 0.15)
+    property color colBackgroundInfo: ColorUtils.mix(Appearance.colors.colPrimary, colBackground, 0.55)
     property color colHourHand: Appearance.colors.colPrimary
     property color colMinuteHand: Appearance.colors.colTertiary
     property color colSecondHand: Appearance.colors.colPrimary
