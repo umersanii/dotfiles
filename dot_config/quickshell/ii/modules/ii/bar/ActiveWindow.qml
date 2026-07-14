@@ -133,6 +133,7 @@ Item {
             color: "black"
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignHCenter
+            textFormat: Text.StyledText
             text: {
                 let title = root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ?
                     root.activeWindow?.title :
@@ -143,7 +144,19 @@ Item {
                 }
 
                 const limit = 50;
-                return title.length > limit ? title.substring(0, limit) + "..." : title;
+                title = title.length > limit ? title.substring(0, limit) + "..." : title;
+
+                // Escape markup, then tint a leading symbol (e.g. ✳ / ·) in a
+                // light accent hue
+                title = title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const m = title.match(/^([^\w\s&]+)(\s*)/);
+                if (m) {
+                    const accent = Qt.hsla(Appearance.colors.colPrimary.hslHue,
+                                           Appearance.colors.colPrimary.hslSaturation,
+                                           0.55, 1);
+                    title = `<font color="${accent}">${m[1]}</font>${m[2]}` + title.slice(m[0].length);
+                }
+                return title;
             }
         }
     }
