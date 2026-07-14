@@ -35,11 +35,12 @@ save_base() {
 }
 
 restore_base() {
+    # Border reset runs even without a snapshot: a previous instance may have
+    # tinted the border, then died without restoring it
+    hyprctl keyword general:col.active_border "rgba(FFFFFFFF)" >/dev/null 2>&1
     [ -f "$BASE_FILE" ] || return
     cp "$BASE_FILE" "$COLORS"
     rm -f "$BASE_FILE"
-    # Back to the base theme's white active border (custom/colors-override.conf)
-    hyprctl keyword general:col.active_border "rgba(FFFFFFFF)" >/dev/null 2>&1
 }
 
 apply_music() {
