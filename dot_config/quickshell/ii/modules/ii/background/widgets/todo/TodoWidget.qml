@@ -136,7 +136,7 @@ AbstractBackgroundWidget {
                                         ? Appearance.colors.colPrimary
                                         : Qt.hsla(Appearance.colors.colPrimary.hslHue,
                                                   Appearance.colors.colPrimary.hslSaturation,
-                                                  0.72, 1)
+                                                  0.58, 1)
                                 }
 
                                 // Text
