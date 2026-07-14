@@ -2,8 +2,9 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
+import QtQuick.Effects
 
-Canvas { // Visualizer (cava-style bars, ported from muser dashboard)
+Canvas { // Visualizer
     id: root
     property list<var> points
     property list<var> smoothPoints
@@ -12,15 +13,11 @@ Canvas { // Visualizer (cava-style bars, ported from muser dashboard)
     property bool live: true
     property color color: Appearance.m3colors.m3primary
 
-    property real fillAlpha: 1.0
+    property real fillAlpha: 0.15
 
     property bool centerBass: false
 
     property bool horizontalFade: false
-
-    property real barGap: 3
-    property real minBarHeight: 2
-    property real glowRadius: 8
 
     onPointsChanged: () => {
         root.requestPaint()
@@ -70,33 +67,40 @@ Canvas { // Visualizer (cava-style bars, ported from muser dashboard)
             root.smoothPoints = reordered;
         }
 
-        // Cap the gap on narrow widgets so bars never collapse to slivers
-        var gap = Math.min(root.barGap, (w / n) * 0.35);
-        var barWidth = (w - gap * (n - 1)) / n;
-
-        // White base quickly blending into an accent-dominant top
-        var grad = ctx.createLinearGradient(0, h, 0, 0);
-        grad.addColorStop(0, "#ffffff");
-        grad.addColorStop(0.12, "#ffffff");
-        grad.addColorStop(0.45, root.color);
-        grad.addColorStop(1, root.color);
-        ctx.fillStyle = grad;
-        ctx.shadowColor = Qt.rgba(root.color.r, root.color.g, root.color.b, 0.55);
-        ctx.shadowBlur = root.glowRadius;
-
+        ctx.beginPath();
+        ctx.moveTo(0, h);
         for (var i = 0; i < n; ++i) {
-            var barHeight = Math.max(root.minBarHeight, (root.smoothPoints[i] / maxVal) * h);
-            var x = i * (barWidth + gap);
-            var alpha = root.fillAlpha;
-            if (root.horizontalFade) {
-                var t = n > 1 ? i / (n - 1) : 0;
-                // Fade bars out toward both horizontal edges
-                if (t < 0.2) alpha *= t / 0.2;
-                else if (t > 0.8) alpha *= (1 - t) / 0.2;
-            }
-            ctx.globalAlpha = alpha;
-            ctx.fillRect(x, h - barHeight, barWidth, barHeight);
+            var x = i * w / (n - 1);
+            var y = h - (root.smoothPoints[i] / maxVal) * h;
+            ctx.lineTo(x, y);
         }
-        ctx.globalAlpha = 1;
+        ctx.lineTo(w, h);
+        ctx.closePath();
+
+        if (root.horizontalFade) {
+            var gradient = ctx.createLinearGradient(0, 0, w, 0);
+            gradient.addColorStop(0, Qt.rgba(root.color.r, root.color.g, root.color.b, 0));
+            gradient.addColorStop(0.2, Qt.rgba(root.color.r, root.color.g, root.color.b, root.fillAlpha));
+            gradient.addColorStop(0.8, Qt.rgba(root.color.r, root.color.g, root.color.b, root.fillAlpha));
+            gradient.addColorStop(1.0, Qt.rgba(root.color.r, root.color.g, root.color.b, 0));
+            ctx.fillStyle = gradient;
+        } else {
+            ctx.fillStyle = Qt.rgba(
+                root.color.r,
+                root.color.g,
+                root.color.b,
+                root.fillAlpha
+            );
+        }
+        ctx.fill();
+    }
+
+    layer.enabled: true
+    layer.effect: MultiEffect { // Blur a bit to obscure away the points
+        source: root
+        saturation: 1.0
+        blurEnabled: true
+        blurMax: 7
+        blur: 1
     }
 }
