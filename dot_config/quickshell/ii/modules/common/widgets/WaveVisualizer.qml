@@ -70,7 +70,8 @@ Canvas { // Visualizer (cava-style bars, ported from muser dashboard)
             root.smoothPoints = reordered;
         }
 
-        var gap = root.barGap;
+        // Cap the gap on narrow widgets so bars never collapse to slivers
+        var gap = Math.min(root.barGap, (w / n) * 0.35);
         var barWidth = (w - gap * (n - 1)) / n;
 
         // White base quickly blending into an accent-dominant top
