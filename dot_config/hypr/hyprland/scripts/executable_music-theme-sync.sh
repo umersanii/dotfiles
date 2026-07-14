@@ -38,6 +38,8 @@ restore_base() {
     [ -f "$BASE_FILE" ] || return
     cp "$BASE_FILE" "$COLORS"
     rm -f "$BASE_FILE"
+    # Back to the base theme's white active border (custom/colors-override.conf)
+    hyprctl keyword general:col.active_border "rgba(FFFFFFFF)" >/dev/null 2>&1
 }
 
 apply_music() {
@@ -51,6 +53,11 @@ apply_music() {
         mv "$COLORS.tmp" "$COLORS"
     else
         rm -f "$COLORS.tmp"
+    fi
+    # Tint the hyprland active window border with the music accent
+    accent=$(jq -r '.primary // empty' "$LIVE" | tr -cd '0-9a-fA-F')
+    if [[ ${#accent} -eq 6 ]]; then
+        hyprctl keyword general:col.active_border "rgba(${accent}FF)" >/dev/null 2>&1
     fi
 }
 

@@ -19,6 +19,11 @@ Item {
     readonly property color colActive: root.warning
         ? Qt.rgba(0xEF/255, 0x44/255, 0x44/255, 1.0)
         : Appearance.colors.colOnLayer1
+    // Accent-colored progress arc; falls back to black when the accent is the
+    // base theme's pure white (invisible against the white circle fill)
+    readonly property color colArc: (root.warning || Qt.colorEqual(Appearance.colors.colPrimary, "#ffffff"))
+        ? "black"
+        : Appearance.colors.colPrimary
 
     RowLayout {
         id: resourceRowLayout
@@ -34,7 +39,7 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: percentage
             implicitSize: 21
-            colPrimary: "black"
+            colPrimary: root.colArc
             colSecondary: root.colActive
             accountForLightBleeding: !root.warning
             enableAnimation: true

@@ -60,12 +60,12 @@ Item {
         onTriggered: root.showNextTodo()
     }
 
-    // Inverted background pill — fades in with the todo
+    // Pure white background pill behind the active window info
     Rectangle {
         anchors.fill: parent
         radius: Appearance.rounding.normal
-        color: Appearance.colors.colOnLayer0
-        opacity: root.todoVisible ? 1 : 0
+        color: "#FFFFFF"
+        opacity: 1
 
         Behavior on opacity {
             NumberAnimation {
@@ -119,7 +119,7 @@ Item {
         StyledText {
             Layout.fillWidth: true
             font.pixelSize: Appearance.font.pixelSize.smaller
-            color: Appearance.colors.colSubtext
+            color: "#B3000000"
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignHCenter
             text: root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ?
@@ -130,7 +130,7 @@ Item {
         StyledText {
             Layout.fillWidth: true
             font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer0
+            color: "black"
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignHCenter
             text: {
