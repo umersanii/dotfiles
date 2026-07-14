@@ -19,11 +19,13 @@ Item {
     readonly property color colActive: root.warning
         ? Qt.rgba(0xEF/255, 0x44/255, 0x44/255, 1.0)
         : Appearance.colors.colOnLayer1
-    // Accent-colored progress arc; falls back to black when the accent is the
-    // base theme's pure white (invisible against the white circle fill)
-    readonly property color colArc: (root.warning || Qt.colorEqual(Appearance.colors.colPrimary, "#ffffff"))
+    // Accent-hued progress arc, lightness clamped dark so it always reads
+    // against the white circle fill (white accent desaturates to dark gray)
+    readonly property color colArc: root.warning
         ? "black"
-        : Appearance.colors.colPrimary
+        : Qt.hsla(Appearance.colors.colPrimary.hslHue,
+                  Appearance.colors.colPrimary.hslSaturation,
+                  0.32, 1)
 
     RowLayout {
         id: resourceRowLayout
