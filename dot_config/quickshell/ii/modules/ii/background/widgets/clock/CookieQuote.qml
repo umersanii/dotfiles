@@ -29,7 +29,8 @@ Item {
         implicitWidth: quoteRow.implicitWidth + 8 * 2
         implicitHeight: quoteRow.implicitHeight + 4 * 2
         radius: Appearance.rounding.small
-        color: Appearance.colors.colSecondaryContainer
+        // Neutral surface — accent stays in the icon/text color
+        color: Appearance.colors.colSurfaceContainerHigh
 
         Row {
             id: quoteRow
