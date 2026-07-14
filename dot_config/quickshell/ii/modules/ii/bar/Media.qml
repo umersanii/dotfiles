@@ -153,7 +153,8 @@ Item {
                 points: root.visualizerPoints
                 maxVisualizerValue: 1000
                 smoothing: 2
-                color: "white"
+                // White blended with the music accent
+                color: ColorUtils.mix("#ffffff", Appearance.colors.colPrimary, 0.5)
                 fillAlpha: 1.0
                 centerBass: true
                 horizontalFade: true
