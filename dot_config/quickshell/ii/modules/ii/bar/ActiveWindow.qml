@@ -60,11 +60,14 @@ Item {
         onTriggered: root.showNextTodo()
     }
 
-    // Pure white background pill behind the active window info
+    // Accent-tinted light pill behind the active window info (near-white when
+    // no music accent is active)
     Rectangle {
         anchors.fill: parent
         radius: Appearance.rounding.normal
-        color: "#FFFFFF"
+        color: Qt.hsla(Appearance.colors.colPrimary.hslHue,
+                       Appearance.colors.colPrimary.hslSaturation,
+                       0.78, 1)
         opacity: 1
 
         Behavior on opacity {
