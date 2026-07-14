@@ -18,12 +18,12 @@ Item {
     implicitWidth: resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth + 8
     implicitHeight: Appearance.sizes.barHeight
     property bool warning: percentage * 100 >= warningThreshold
-    readonly property color colActive: root.warning
-        ? Qt.rgba(0xEF/255, 0x44/255, 0x44/255, 1.0)
-        : Appearance.colors.colOnLayer1
+    readonly property color colActive: "black"
     readonly property color colAccentDark: "black"
-    // Light tint of the accent hue, forced light regardless of dark/light mode
-    readonly property color colDiscBackground: ColorUtils.colorWithLightness(Appearance.colors.colPrimary, 0.85)
+    // Disc background: blend of white and the accent hue, forced light regardless of dark/light mode
+    readonly property color colDiscBackground: root.warning
+        ? Qt.rgba(0xEF/255, 0x44/255, 0x44/255, 1.0)
+        : ColorUtils.colorWithLightness(Appearance.colors.colPrimary, 0.85)
 
     RowLayout {
         id: resourceRowLayout
@@ -39,8 +39,8 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: percentage
             implicitSize: 21
-            colPrimary: root.colDiscBackground
-            colSecondary: root.colActive
+            colPrimary: root.colActive
+            colSecondary: root.colDiscBackground
             accountForLightBleeding: !root.warning
             enableAnimation: true
 
