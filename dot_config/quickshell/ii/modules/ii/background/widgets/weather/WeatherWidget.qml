@@ -23,7 +23,8 @@ AbstractBackgroundWidget {
         id: backgroundShape
         anchors.fill: parent
         shape: MaterialShape.Shape.Pill
-        color: Appearance.colors.colPrimaryContainer
+        // Neutral surface — accents only in the temperature text and icon
+        color: Appearance.colors.colSurfaceContainerHigh
         implicitSize: 210
 
         StyledText {
