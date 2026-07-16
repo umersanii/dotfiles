@@ -60,7 +60,7 @@ Item {
         onTriggered: root.showNextTodo()
     }
 
-    // Accent-tinted light pill behind the active window info (near-white when
+    // Accent-tinted light pill — only shown behind todos (near-white when
     // no music accent is active)
     Rectangle {
         anchors.fill: parent
@@ -68,7 +68,8 @@ Item {
         color: Qt.hsla(Appearance.colors.colPrimary.hslHue,
                        Appearance.colors.colPrimary.hslSaturation,
                        0.78, 1)
-        opacity: 1
+        opacity: root.todoVisible ? 1 : 0
+        visible: opacity > 0
 
         Behavior on opacity {
             NumberAnimation {
@@ -122,7 +123,7 @@ Item {
         StyledText {
             Layout.fillWidth: true
             font.pixelSize: Appearance.font.pixelSize.smaller
-            color: "#B3000000"
+            color: Appearance.colors.colSubtext
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignHCenter
             text: root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ?
@@ -133,7 +134,7 @@ Item {
         StyledText {
             Layout.fillWidth: true
             font.pixelSize: Appearance.font.pixelSize.small
-            color: "black"
+            color: Appearance.colors.colOnLayer0
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignHCenter
             textFormat: Text.StyledText
