@@ -44,13 +44,17 @@ Personal dotfiles for my Arch Linux setup on the Lenovo Legion 5 Pro, managed wi
 
 ## Installation
 
-Requires chezmoi:
+### 1. Prerequisites
+- Arch Linux (or an Arch-based distro) with `sudo` access
+- An SSH key added to your GitHub account (the repo is cloned over SSH)
+- An AUR helper — [`yay`](https://aur.archlinux.org/packages/yay) is used by the package install script below:
+  ```bash
+  git clone https://aur.archlinux.org/yay.git /tmp/yay && cd /tmp/yay && makepkg -si
+  ```
+
+### 2. Install chezmoi and apply the dotfiles
 ```bash
 sudo pacman -S chezmoi
-```
-
-Then apply:
-```bash
 chezmoi init --apply git@github.com:umersanii/dotfiles.git
 ```
 
@@ -59,6 +63,21 @@ Switch to the Legion 5 Pro branch:
 chezmoi git -- checkout Legion-5-Pro
 chezmoi apply
 ```
+
+### 3. Install packages
+`chezmoi apply` automatically runs `run_onchange_install-packages.sh`, which installs the full stack (Hyprland, Quickshell/`illogical-impulse`, fish, kitty, starship, matugen, wlogout, fuzzel, btop, fastfetch, pipewire, etc.) via `pacman`/`yay`. Re-run it manually any time with:
+```bash
+chezmoi apply
+```
+(chezmoi re-runs the script automatically whenever its contents change; use `chezmoi state delete-bucket --bucket=scriptState` if you need to force a re-run.)
+
+### 4. Machine-specific caveats
+- `hypr/monitors.conf` is tracked as-is (not templated per-machine) — edit it by hand if the new device has a different display layout.
+- After changing `monitors.conf` from mirrored to extended, Quickshell won't spawn on the new monitor until you physically unplug/replug the cable (see Known Issues in `CLAUDE.md`).
+- Re-enable the auto-sync timer (see below) since `systemctl --user enable` state isn't part of the dotfiles themselves:
+  ```bash
+  systemctl --user enable --now dotfiles-sync.timer
+  ```
 
 ## Auto-sync
 
