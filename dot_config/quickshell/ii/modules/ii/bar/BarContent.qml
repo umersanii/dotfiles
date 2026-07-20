@@ -232,23 +232,27 @@ Item { // Bar content region
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
 
-            // Update age border: white >= 7 days, red >= 14 days
-            Rectangle {
-                anchors.fill: parent
-                anchors.topMargin: 4
-                anchors.bottomMargin: 4
-                radius: Appearance.rounding.normal
-                color: "transparent"
-                border.width: Updates.daysSinceLastUpdate >= 7 ? 1 : 0
-                border.color: Updates.daysSinceLastUpdate >= 14 ? "#F44336" : "white"
-                visible: Updates.daysSinceLastUpdate >= 7
-            }
-
-            ActiveWindow {
-                id: activeWindowWidget
+            Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                visible: root.useShortenedForm === 0
+
+                ActiveWindow {
+                    id: activeWindowWidget
+                    anchors.fill: parent
+                    visible: root.useShortenedForm === 0
+                }
+
+                // Update age border: white >= 7 days, red >= 14 days
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.topMargin: 4
+                    anchors.bottomMargin: 4
+                    radius: Appearance.rounding.normal
+                    color: "transparent"
+                    border.width: Updates.daysSinceLastUpdate >= 7 ? 1 : 0
+                    border.color: Updates.daysSinceLastUpdate >= 14 ? "#F44336" : "white"
+                    visible: Updates.daysSinceLastUpdate >= 7
+                }
             }
         }
 
