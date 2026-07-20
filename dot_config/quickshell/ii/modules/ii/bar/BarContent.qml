@@ -233,6 +233,8 @@ Item { // Bar content region
             anchors.verticalCenter: parent.verticalCenter
 
             Item {
+                implicitWidth: activeWindowWidget.implicitWidth
+                implicitHeight: activeWindowWidget.implicitHeight
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
