@@ -42,6 +42,8 @@ Singleton {
     property string generatedMaterialThemePath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/colors.json`)
     property string generatedWallpaperCategoryPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/wallpaper/category.txt`)
     property string cliphistDecode: FileUtils.trimFileProtocol(`/tmp/quickshell/media/cliphist`)
+    property string pinnedClipboardPath: FileUtils.trimFileProtocol(`${Directories.state}/user/pinned-clipboard.json`)
+    property string pinnedClipboardImages: FileUtils.trimFileProtocol(`${Directories.state}/user/pinned-clipboard-images`)
     property string screenshotTemp: "/tmp/quickshell/media/screenshot"
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)
     property string defaultAiPrompts: Quickshell.shellPath("defaults/ai/prompts")
