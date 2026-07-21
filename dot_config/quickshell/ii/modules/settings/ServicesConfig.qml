@@ -149,6 +149,15 @@ ContentPage {
                 }
                 MaterialTextArea {
                     Layout.fillWidth: true
+                    placeholderText: Translation.tr("Pinned clipboard")
+                    text: Config.options.search.prefix.pinnedClipboard
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.search.prefix.pinnedClipboard = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
                     placeholderText: Translation.tr("Emojis")
                     text: Config.options.search.prefix.emojis
                     wrapMode: TextEdit.Wrap
