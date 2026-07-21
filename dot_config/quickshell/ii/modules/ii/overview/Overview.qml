@@ -129,6 +129,16 @@ Scope {
         GlobalStates.overviewOpen = true;
     }
 
+    function togglePinnedClipboard() {
+        if (GlobalStates.overviewOpen && overviewScope.dontAutoCancelSearch) {
+            GlobalStates.overviewOpen = false;
+            return;
+        }
+        overviewScope.dontAutoCancelSearch = true;
+        panelWindow.setSearchingText(Config.options.search.prefix.pinnedClipboard);
+        GlobalStates.overviewOpen = true;
+    }
+
     IpcHandler {
         target: "search"
 
@@ -149,6 +159,9 @@ Scope {
         }
         function clipboardToggle() {
             overviewScope.toggleClipboard();
+        }
+        function pinnedClipboardToggle() {
+            overviewScope.togglePinnedClipboard();
         }
     }
 
@@ -219,6 +232,15 @@ Scope {
 
         onPressed: {
             overviewScope.toggleEmojis();
+        }
+    }
+
+    GlobalShortcut {
+        name: "overviewPinnedClipboardToggle"
+        description: "Toggle pinned clipboard query on overview widget"
+
+        onPressed: {
+            overviewScope.togglePinnedClipboard();
         }
     }
 }
