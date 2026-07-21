@@ -34,6 +34,7 @@ RippleButton {
     property string materialSymbol: entry.iconType === LauncherSearchResult.IconType.Material ? entry?.iconName ?? "" : ""
     property string cliphistRawString: entry?.rawValue ?? ""
     property bool blurImage: entry?.blurImage ?? false
+    property string pinnedImagePath: entry?.pinnedImagePath ?? ""
     
     visible: root.entryShown
     property int horizontalMargin: 10
@@ -109,6 +110,12 @@ RippleButton {
 
             if (deleteAction) {
                 deleteAction.execute()
+            }
+        } else if (event.key === Qt.Key_P && event.modifiers === Qt.ControlModifier) {
+            const pinAction = root.entry.actions.find(action => action.name == Translation.tr("Pin") || action.name == Translation.tr("Unpin"));
+
+            if (pinAction) {
+                pinAction.execute()
             }
         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
             root.keyboardDown = true
@@ -226,10 +233,21 @@ RippleButton {
                 }
             }
             Loader { // Clipboard image preview
-                active: root.cliphistRawString && Cliphist.entryIsImage(root.cliphistRawString)
+                active: root.cliphistRawString && !root.pinnedImagePath && Cliphist.entryIsImage(root.cliphistRawString)
                 sourceComponent: CliphistImage {
                     Layout.fillWidth: true
                     entry: root.cliphistRawString
+                    maxWidth: contentColumn.width
+                    maxHeight: 140
+                    blur: root.blurImage
+                }
+            }
+            Loader { // Pinned clipboard image preview
+                active: root.pinnedImagePath !== ""
+                sourceComponent: PinnedClipboardImage {
+                    Layout.fillWidth: true
+                    imagePath: root.pinnedImagePath
+                    preview: root.cliphistRawString
                     maxWidth: contentColumn.width
                     maxHeight: 140
                     blur: root.blurImage
