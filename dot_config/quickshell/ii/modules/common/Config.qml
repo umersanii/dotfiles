@@ -494,6 +494,7 @@ Singleton {
                     property string action: "/"
                     property string app: ">"
                     property string clipboard: ";"
+                    property string pinnedClipboard: "'"
                     property string emojis: ":"
                     property string math: "="
                     property string shellCommand: "$"
