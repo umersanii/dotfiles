@@ -44,9 +44,6 @@ Item {
     property int windowDraggingZ: 99999
     property real workspaceSpacing: 5
 
-    property int draggingFromWorkspace: -1
-    property int draggingTargetWorkspace: -1
-
     implicitWidth: overviewBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
     implicitHeight: overviewBackground.implicitHeight + Appearance.sizes.elevationMargin * 2
 
@@ -67,6 +64,42 @@ Item {
         // 1-indexed workspace, 0-indexed row and column index
         return (Config.options.overview.orderBottomUp ? Config.options.overview.rows - ri - 1 : ri) * Config.options.overview.columns + (Config.options.overview.orderRightLeft ? Config.options.overview.columns - ci - 1 : ci) + 1
     }
+
+    // Hit-tests a Hyprland-global cursor position against this monitor's workspace
+    // grid, returning the hovered workspace id or -1 if the point is outside this
+    // monitor entirely or in the gap/padding between cells.
+    function hitTestGlobal(globalX, globalY) {
+        if (!monitorData) return -1;
+        // hyprctl reports width/height as physical pixels but x/y as logical
+        // layout position, so the physical size must be scaled down to compare.
+        const logicalWidth = monitorData.width / monitorData.scale;
+        const logicalHeight = monitorData.height / monitorData.scale;
+        const monitorLocalX = globalX - monitorData.x;
+        const monitorLocalY = globalY - monitorData.y;
+        if (monitorLocalX < 0 || monitorLocalX >= logicalWidth || monitorLocalY < 0 || monitorLocalY >= logicalHeight) return -1;
+
+        // root's origin within its own PanelWindow, which itself covers the whole
+        // monitor, so this doubles as "root's origin in monitor-local coordinates".
+        const originInWindow = root.QsWindow?.mapFromItem(root, 0, 0);
+        if (!originInWindow) return -1;
+        const localX = monitorLocalX - originInWindow.x - Appearance.sizes.elevationMargin - overviewBackground.padding;
+        const localY = monitorLocalY - originInWindow.y - Appearance.sizes.elevationMargin - overviewBackground.padding;
+        if (localX < 0 || localY < 0) return -1;
+
+        const cellW = root.workspaceImplicitWidth + root.workspaceSpacing;
+        const cellH = root.workspaceImplicitHeight + root.workspaceSpacing;
+        const col = Math.floor(localX / cellW);
+        const row = Math.floor(localY / cellH);
+        if (col < 0 || col >= Config.options.overview.columns || row < 0 || row >= Config.options.overview.rows) return -1;
+        // Exclude the spacing gap after each cell
+        if (localX - col * cellW >= root.workspaceImplicitWidth) return -1;
+        if (localY - row * cellH >= root.workspaceImplicitHeight) return -1;
+
+        return root.workspaceGroup * root.workspacesShown + getWsInCell(row, col);
+    }
+
+    Component.onCompleted: OverviewDrag.registerWidget(root)
+    Component.onDestruction: OverviewDrag.unregisterWidget(root)
 
     StyledRectangularShadow {
         target: overviewBackground
@@ -106,7 +139,9 @@ Item {
                             property color defaultWorkspaceColor: Appearance.colors.colSurfaceContainerLow
                             property color hoveredWorkspaceColor: ColorUtils.mix(defaultWorkspaceColor, Appearance.colors.colLayer1Hover, 0.1)
                             property color hoveredBorderColor: Appearance.colors.colLayer2Hover
-                            property bool hoveredWhileDragging: false
+                            property bool hoveredWhileDragging: OverviewDrag.active
+                                && OverviewDrag.targetMonitorId === root.monitor.id
+                                && OverviewDrag.targetWorkspaceId === workspace.workspaceValue
 
                             implicitWidth: root.workspaceImplicitWidth
                             implicitHeight: root.workspaceImplicitHeight
@@ -140,26 +175,12 @@ Item {
                                 anchors.fill: parent
                                 acceptedButtons: Qt.LeftButton
                                 onPressed: {
-                                    if (root.draggingTargetWorkspace === -1) {
+                                    if (!OverviewDrag.active) {
                                         GlobalStates.overviewOpen = false
                                         Hyprland.dispatch(`workspace ${workspace.workspaceValue}`)
                                     }
                                 }
                             }
-
-                            DropArea {
-                                anchors.fill: parent
-                                onEntered: {
-                                    root.draggingTargetWorkspace = workspace.workspaceValue
-                                    if (root.draggingFromWorkspace == root.draggingTargetWorkspace) return;
-                                    hoveredWhileDragging = true
-                                }
-                                onExited: {
-                                    hoveredWhileDragging = false
-                                    if (root.draggingTargetWorkspace == workspace.workspaceValue) root.draggingTargetWorkspace = -1
-                                }
-                            }
-
                         }
                     }
                 }
@@ -252,19 +273,19 @@ Item {
                         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                         drag.target: parent
                         onPressed: (mouse) => {
-                            root.draggingFromWorkspace = windowData?.workspace.id
                             window.pressed = true
                             window.Drag.active = true
                             window.Drag.source = window
                             window.Drag.hotSpot.x = mouse.x
                             window.Drag.hotSpot.y = mouse.y
+                            OverviewDrag.start(window.windowData?.address, windowData?.workspace.id, root.monitor.id)
                             // console.log(`[OverviewWindow] Dragging window ${windowData?.address} from position (${window.x}, ${window.y})`)
                         }
                         onReleased: {
-                            const targetWorkspace = root.draggingTargetWorkspace
+                            const targetWorkspace = OverviewDrag.targetWorkspaceId
                             window.pressed = false
                             window.Drag.active = false
-                            root.draggingFromWorkspace = -1
+                            OverviewDrag.stop()
                             if (targetWorkspace !== -1 && targetWorkspace !== windowData?.workspace.id) {
                                 Hyprland.dispatch(`movetoworkspacesilent ${targetWorkspace}, address:${window.windowData?.address}`)
                                 updateWindowPosition.restart()
