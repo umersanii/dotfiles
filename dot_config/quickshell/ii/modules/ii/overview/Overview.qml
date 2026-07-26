@@ -14,10 +14,10 @@ import Quickshell.Hyprland
 Scope {
     id: overviewScope
     property bool dontAutoCancelSearch: false
+    property string searchingText: ""
 
     PanelWindow {
         id: panelWindow
-        property string searchingText: ""
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
         visible: GlobalStates.overviewOpen
@@ -81,10 +81,10 @@ Scope {
                 if (event.key === Qt.Key_Escape) {
                     GlobalStates.overviewOpen = false;
                 } else if (event.key === Qt.Key_Left) {
-                    if (!panelWindow.searchingText)
+                    if (!overviewScope.searchingText)
                         Hyprland.dispatch("workspace r-1");
                 } else if (event.key === Qt.Key_Right) {
-                    if (!panelWindow.searchingText)
+                    if (!overviewScope.searchingText)
                         Hyprland.dispatch("workspace r+1");
                 }
             }
@@ -93,7 +93,7 @@ Scope {
                 id: searchWidget
                 anchors.horizontalCenter: parent.horizontalCenter
                 Synchronizer on searchingText {
-                    property alias source: panelWindow.searchingText
+                    property alias source: overviewScope.searchingText
                 }
             }
 
@@ -103,7 +103,70 @@ Scope {
                 active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
                 sourceComponent: OverviewWidget {
                     screen: panelWindow.screen
-                    visible: (panelWindow.searchingText == "")
+                    visible: (overviewScope.searchingText == "")
+                }
+            }
+        }
+    }
+
+    // The primary panel above only covers one screen (the one it was created on)
+    // and owns the search bar + keyboard focus. Every other connected monitor needs
+    // its own workspace-grid surface too, so windows can actually be seen and
+    // dropped there when dragged across from another monitor's overview - otherwise
+    // that monitor has no overview UI at all and drags into it silently do nothing.
+    Variants {
+        model: Quickshell.screens.filter(s => s !== panelWindow.screen)
+
+        PanelWindow {
+            id: secondaryPanelWindow
+            required property var modelData
+            screen: modelData
+            visible: GlobalStates.overviewOpen && overviewScope.searchingText == ""
+
+            WlrLayershell.namespace: "quickshell:overview"
+            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            color: "transparent"
+
+            mask: Region {
+                item: secondaryOverviewLoader
+            }
+
+            anchors {
+                top: true
+                bottom: true
+                left: true
+                right: true
+            }
+
+            // The primary panel's HyprlandFocusGrab only lists itself as an
+            // accepted window, so any click landing on a secondary monitor's
+            // surface (not in that list) is treated as "clicked outside" and
+            // dismisses the whole overview instead of reaching the workspace
+            // cell underneath. Register this surface too so clicks on it count
+            // as inside the grab.
+            Connections {
+                target: GlobalStates
+                function onOverviewOpenChanged() {
+                    if (GlobalStates.overviewOpen) {
+                        GlobalFocusGrab.addDismissable(secondaryPanelWindow);
+                    }
+                }
+            }
+
+            implicitWidth: secondaryOverviewLoader.implicitWidth
+            implicitHeight: secondaryOverviewLoader.implicitHeight
+
+            Loader {
+                id: secondaryOverviewLoader
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    topMargin: searchWidget.height + columnLayout.spacing
+                }
+                active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
+                sourceComponent: OverviewWidget {
+                    screen: secondaryPanelWindow.screen
                 }
             }
         }
