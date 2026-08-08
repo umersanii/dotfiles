@@ -12,11 +12,11 @@ if [[ -f "$STATE_FILE" ]]; then
     hyprctl keyword general:gaps_out 5
     rm -f "$STATE_FILE"
 else
-    # Currently ON — disable border, rounding, and gaps
+    # Currently ON — disable border and rounding, keep a hairline gap so adjacent windows stay distinguishable
     hyprctl keyword general:border_size 0
     hyprctl keyword decoration:rounding 0
     hyprctl keyword decoration:rounding_power 2
-    hyprctl keyword general:gaps_in 0
-    hyprctl keyword general:gaps_out 0
+    hyprctl keyword general:gaps_in 1
+    hyprctl keyword general:gaps_out 1
     touch "$STATE_FILE"
 fi
