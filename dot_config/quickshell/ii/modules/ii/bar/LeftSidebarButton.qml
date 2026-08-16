@@ -26,6 +26,7 @@ RippleButton {
     colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
     colRippleToggled: Appearance.colors.colSecondaryContainerActive
     toggled: GlobalStates.sidebarLeftOpen
+    borderColor: aiActive ? ColorUtils.mix(Appearance.colors.colOutlineVariant, "#4FC3F7", distroIcon.pulseMix) : Appearance.colors.colOutlineVariant
 
     onPressed: {
         GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen;
@@ -79,6 +80,15 @@ RippleButton {
             loops: Animation.Infinite
             NumberAnimation { from: 0.4; to: 1.0; duration: 450; easing.type: Easing.InOutQuad }
             NumberAnimation { from: 1.0; to: 0.4; duration: 450; easing.type: Easing.InOutQuad }
+        }
+
+        rotation: root.aiActive ? spinAngle : 0
+        property real spinAngle: 0
+        SequentialAnimation on spinAngle {
+            running: root.aiActive
+            loops: Animation.Infinite
+            RotationAnimation { from: 0; to: 360; duration: 900; easing.type: Easing.InOutQuad }
+            PauseAnimation { duration: 600 }
         }
 
         Rectangle {
