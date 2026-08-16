@@ -3,11 +3,13 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 
 RippleButton {
     id: root
 
     property bool showPing: false
+    readonly property bool aiActive: Ai.isGenerating && Ai.currentModelId.startsWith("gemma")
 
     property bool aiChatEnabled: Config.options.policies.ai !== 0
     property bool translatorEnabled: Config.options.sidebar.translator.enable
@@ -59,7 +61,25 @@ RippleButton {
         height: 19.5
         source: Config.options.bar.topLeftIcon == 'distro' ? SystemInfo.distroIcon : `${Config.options.bar.topLeftIcon}-symbolic`
         colorize: true
-        color: Appearance.colors.colOnLayer0
+        readonly property color aiPulseColor: "#4FC3F7"
+        color: root.aiActive ? ColorUtils.mix(Appearance.colors.colOnLayer0, aiPulseColor, pulseMix) : Appearance.colors.colOnLayer0
+        scale: root.aiActive ? pulseScale : 1.0
+
+        property real pulseScale: 1.0
+        SequentialAnimation on pulseScale {
+            running: root.aiActive
+            loops: Animation.Infinite
+            NumberAnimation { from: 1.0; to: 1.18; duration: 450; easing.type: Easing.InOutQuad }
+            NumberAnimation { from: 1.18; to: 1.0; duration: 450; easing.type: Easing.InOutQuad }
+        }
+
+        property real pulseMix: 0.4
+        SequentialAnimation on pulseMix {
+            running: root.aiActive
+            loops: Animation.Infinite
+            NumberAnimation { from: 0.4; to: 1.0; duration: 450; easing.type: Easing.InOutQuad }
+            NumberAnimation { from: 1.0; to: 0.4; duration: 450; easing.type: Easing.InOutQuad }
+        }
 
         Rectangle {
             opacity: root.showPing ? 1 : 0
