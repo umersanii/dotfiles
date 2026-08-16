@@ -44,6 +44,16 @@ chezmoi edit ~/.config/<path/to/file>
 
 When editing configs directly in `~/.config/`, run `chezmoi re-add <file>` afterward to sync back to the source. The auto-sync timer will handle git push, or run `dotfiles-sync.sh` manually.
 
+## Local LLM (Gemma 4 via Ollama)
+
+- Hardware: RTX 3070 Ti Laptop (8GB VRAM) + 30GB RAM — see `whichllm` (`uvx whichllm@latest`) for live hardware-fit rankings
+- Model: `gemma4:26b-a4b-it-q4_K_M` (MoE, ~4B active params, partial VRAM/RAM offload) pulled via `ollama pull gemma4:26b-a4b-it-q4_K_M`
+- Requires Ollama ≥ 0.32 (function calling support) — installed at `/usr/local/bin/ollama`, `ollama.service` is a disabled system unit, start manually with `sudo systemctl start ollama` or `enable --now` to persist across reboots
+- Wired into the quickshell AI sidebar (`Super, A`) as an `extraModels` entry in `~/.config/illogical-impulse/config.json`, served through Ollama's OpenAI-compatible endpoint `http://localhost:11434/v1/chat/completions`
+- Set as the default sidebar model via `ai.model` in `~/.local/state/quickshell/states.json` (runtime state, not chezmoi-managed) — the model ID there is the sanitized form of the model name (`:` → `_`), e.g. `gemma4_26b-a4b-it-q4_K_M`
+- Bar icon feedback: `~/.config/quickshell/ii/services/Ai.qml` exposes `isGenerating` (aliased to the request `Process.running`); `~/.config/quickshell/ii/modules/ii/bar/LeftSidebarButton.qml` uses `Ai.isGenerating && Ai.currentModelId.startsWith("gemma")` to pulse the top-left icon size/color (blue `#4FC3F7`) and give it a stop-start spin while a Gemma response is generating
+- Ollama auto-unloads idle models after 5 min (`--keepalive` to override); avoid loading it when other GPU/RAM-heavy work is running to prevent swap thrashing
+
 ## Known Issues & Fixes
 
 ### External monitor shows black screen after switching from mirror to extended
