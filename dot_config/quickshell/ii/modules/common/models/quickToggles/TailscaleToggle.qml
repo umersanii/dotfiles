@@ -116,7 +116,7 @@ QuickToggleModel {
 
     Process {
         id: tsUp
-        command: ["sudo", "tailscale", "up", "--timeout=10s"]
+        command: ["sudo", "tailscale", "up", "--timeout=10s", "--reset", "--operator=" + Quickshell.env("USER")]
         stdout: StdioCollector {
             id: tsUpCollector
             onStreamFinished: {
