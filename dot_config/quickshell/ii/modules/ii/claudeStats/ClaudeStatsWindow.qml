@@ -494,6 +494,53 @@ while p > 1 and p not in s:
                         color: Appearance.colors.colOutlineVariant
                     }
 
+                    // 5h rate limit + pace (compact)
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        StyledText {
+                            text: "5hr"
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnSurfaceVariant
+                        }
+                        StyledProgressBar {
+                            Layout.fillWidth: true
+                            value: ClaudeUsage.fiveHourUsedPercentage
+                            valueBarHeight: 5
+                            valueBarGap: 0
+                            trackColor: Appearance.colors.colLayer2
+                            highlightColor: ClaudeUsage.fiveHourUsedPercentage > 0.8
+                                ? Appearance.colors.colError
+                                : Appearance.colors.colPrimary
+                        }
+                        StyledText {
+                            text: Math.round(ClaudeUsage.fiveHourUsedPercentage * 100) + "%"
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnSurface
+                        }
+                        StyledText {
+                            text: ClaudeUsage.paceExhaustionAt > 0
+                                ? (ClaudeUsage.paceWillExhaustEarly ? "⚠~" : "~") + ClaudeUsage.formatPaceEta()
+                                    + " (" + ClaudeUsage.formatPaceAtTime() + ")"
+                                : "…"
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: ClaudeUsage.paceWillExhaustEarly
+                                ? Appearance.colors.colError
+                                : Appearance.colors.colOutline
+
+                            HoverHandler { id: compactPaceHover }
+                            ToolTip {
+                                visible: compactPaceHover.hovered
+                                text: ClaudeUsage.paceExhaustionAt > 0
+                                    ? (ClaudeUsage.paceWillExhaustEarly
+                                        ? "At your current burn rate, you'll likely hit the 5h cap before it naturally resets"
+                                        : "Projected time to hit the 5h cap at your current burn rate (later than the natural reset, so you're fine)")
+                                    : "Not enough usage samples yet this window to estimate a burn rate"
+                                delay: 300
+                            }
+                        }
+                    }
+
                     // Session rows
                     Repeater {
                         model: statsRoot.activeSessions
@@ -524,28 +571,16 @@ while p > 1 and p not in s:
                                         onStopped: compactDot.opacity = 1
                                     }
                                 }
-                                ColumnLayout {
+                                StyledText {
+                                    text: {
+                                        const parts = modelData.cwd.split("/")
+                                        return parts[parts.length - 1] || modelData.cwd
+                                    }
+                                    font.pixelSize: Appearance.font.pixelSize.small
+                                    font.weight: Font.Medium
+                                    color: Appearance.colors.colOnSurface
+                                    elide: Text.ElideRight
                                     Layout.fillWidth: true
-                                    spacing: 0
-                                    StyledText {
-                                        text: {
-                                            const parts = modelData.cwd.split("/")
-                                            return parts[parts.length - 1] || modelData.cwd
-                                        }
-                                        font.pixelSize: Appearance.font.pixelSize.small
-                                        font.weight: Font.Medium
-                                        color: Appearance.colors.colOnSurface
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
-                                    }
-                                    StyledText {
-                                        visible: (modelData.email ?? "") !== ""
-                                        text: modelData.email ?? ""
-                                        font.pixelSize: Appearance.font.pixelSize.smallest
-                                        color: Appearance.colors.colOutline
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
-                                    }
                                 }
                                 StyledText {
                                     visible: hasUsage
@@ -1007,96 +1042,131 @@ while p > 1 and p not in s:
                                     color: Appearance.colors.colOutlineVariant
                                 }
 
-                                // ── Rate limits + last-updated ────────────────
-                                RowLayout {
+                                // ── Rate limits card ──────────────────────────
+                                Rectangle {
                                     Layout.fillWidth: true
-                                    spacing: 16
+                                    implicitHeight: rateLimitsOverviewCol.implicitHeight + 24
+                                    color:        Appearance.colors.colLayer1
+                                    radius:       Appearance.rounding.normal
+                                    border.width: 1
+                                    border.color: Appearance.colors.colLayer0Border
 
-                                    StyledText {
-                                        text: "Rate limits"
-                                        font.pixelSize: Appearance.font.pixelSize.smaller
-                                        color: Appearance.colors.colOnSurfaceVariant
-                                    }
+                                    ColumnLayout {
+                                        id: rateLimitsOverviewCol
+                                        anchors { fill: parent; margins: 12 }
+                                        spacing: 10
 
-                                    // 5-hour bar
-                                    RowLayout {
-                                        spacing: 6
                                         StyledText {
-                                            text: "5hr"
+                                            text: "Rate limits"
                                             font.pixelSize: Appearance.font.pixelSize.smaller
                                             color: Appearance.colors.colOnSurfaceVariant
-                                            Layout.preferredWidth: 22
                                         }
-                                        StyledProgressBar {
-                                            value: ClaudeUsage.fiveHourUsedPercentage
-                                            valueBarWidth: 160
-                                            valueBarHeight: 6
-                                            valueBarGap: 0
-                                            trackColor: Appearance.colors.colLayer2
-                                            highlightColor: ClaudeUsage.fiveHourUsedPercentage > 0.8
-                                                ? Appearance.colors.colError
-                                                : Appearance.colors.colPrimary
-                                        }
-                                        StyledText {
-                                            text: Math.round(ClaudeUsage.fiveHourUsedPercentage * 100) + "%"
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colOnSurface
-                                            Layout.preferredWidth: 34
-                                        }
-                                        StyledText {
-                                            text: ClaudeUsage.formatResetAt(ClaudeUsage.fiveHourResetsAt)
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colOutline
-                                        }
-                                        StyledText {
-                                            visible: ClaudeUsage.paceExhaustionAt > 0
-                                            text: "⚠ pace: ~" + ClaudeUsage.formatPaceEta()
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colError
 
-                                            HoverHandler { id: paceHover }
-                                            ToolTip {
-                                                visible: paceHover.hovered
-                                                text: "At your current burn rate, you'll likely hit the 5h cap before it naturally resets"
-                                                delay: 300
+                                        // ── 5-hour row ──────────────────────
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 3
+
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 10
+                                                StyledText {
+                                                    text: "5hr"
+                                                    font.pixelSize: Appearance.font.pixelSize.small
+                                                    color: Appearance.colors.colOnSurfaceVariant
+                                                    Layout.preferredWidth: 28
+                                                }
+                                                StyledProgressBar {
+                                                    Layout.fillWidth: true
+                                                    value: ClaudeUsage.fiveHourUsedPercentage
+                                                    valueBarHeight: 7
+                                                    valueBarGap: 0
+                                                    trackColor: Appearance.colors.colLayer2
+                                                    highlightColor: ClaudeUsage.fiveHourUsedPercentage > 0.8
+                                                        ? Appearance.colors.colError
+                                                        : Appearance.colors.colPrimary
+                                                }
+                                                StyledText {
+                                                    text: Math.round(ClaudeUsage.fiveHourUsedPercentage * 100) + "%"
+                                                    font.pixelSize: Appearance.font.pixelSize.small
+                                                    color: Appearance.colors.colOnSurface
+                                                    Layout.preferredWidth: 34
+                                                    horizontalAlignment: Text.AlignRight
+                                                }
+                                                StyledText {
+                                                    text: "resets " + ClaudeUsage.formatResetAt(ClaudeUsage.fiveHourResetsAt)
+                                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                                    color: Appearance.colors.colOutline
+                                                    Layout.preferredWidth: 92
+                                                }
+                                            }
+
+                                            // Pace estimate — own line, indented under the bar
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                Layout.leftMargin: 38
+                                                spacing: 4
+                                                StyledText {
+                                                    text: ClaudeUsage.paceExhaustionAt > 0
+                                                        ? (ClaudeUsage.paceWillExhaustEarly ? "⚠ pace: ~" : "pace: ~") + ClaudeUsage.formatPaceEta()
+                                                            + " (" + ClaudeUsage.formatPaceAtTime() + ")"
+                                                        : "pace: gathering…"
+                                                    font.pixelSize: Appearance.font.pixelSize.smallest
+                                                    color: ClaudeUsage.paceWillExhaustEarly
+                                                        ? Appearance.colors.colError
+                                                        : Appearance.colors.colOutline
+
+                                                    HoverHandler { id: paceHover }
+                                                    ToolTip {
+                                                        visible: paceHover.hovered
+                                                        text: ClaudeUsage.paceExhaustionAt > 0
+                                                            ? (ClaudeUsage.paceWillExhaustEarly
+                                                                ? "At your current burn rate, you'll likely hit the 5h cap before it naturally resets"
+                                                                : "Projected time to hit the 5h cap at your current burn rate (later than the natural reset, so you're fine)")
+                                                            : "Not enough usage samples yet this window to estimate a burn rate"
+                                                        delay: 300
+                                                    }
+                                                }
+                                                Item { Layout.fillWidth: true }
+                                            }
+                                        }
+
+                                        // ── 7-day row ───────────────────────
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 10
+                                            StyledText {
+                                                text: "7d"
+                                                font.pixelSize: Appearance.font.pixelSize.small
+                                                color: Appearance.colors.colOnSurfaceVariant
+                                                Layout.preferredWidth: 28
+                                            }
+                                            StyledProgressBar {
+                                                Layout.fillWidth: true
+                                                value: ClaudeUsage.sevenDayUsedPercentage
+                                                valueBarHeight: 7
+                                                valueBarGap: 0
+                                                trackColor: Appearance.colors.colLayer2
+                                                highlightColor: ClaudeUsage.sevenDayUsedPercentage > 0.8
+                                                    ? Appearance.colors.colError
+                                                    : Appearance.colors.colPrimary
+                                            }
+                                            StyledText {
+                                                text: Math.round(ClaudeUsage.sevenDayUsedPercentage * 100) + "%"
+                                                font.pixelSize: Appearance.font.pixelSize.small
+                                                color: Appearance.colors.colOnSurface
+                                                Layout.preferredWidth: 34
+                                                horizontalAlignment: Text.AlignRight
+                                            }
+                                            StyledText {
+                                                readonly property string _date: ClaudeUsage.formatResetDate(ClaudeUsage.sevenDayResetsAt)
+                                                text: "resets " + ClaudeUsage.formatResetAt(ClaudeUsage.sevenDayResetsAt) + (_date ? " · " + _date : "")
+                                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                                color: Appearance.colors.colOutline
+                                                Layout.preferredWidth: 92
                                             }
                                         }
                                     }
-
-                                    // 7-day bar
-                                    RowLayout {
-                                        spacing: 6
-                                        StyledText {
-                                            text: "7d"
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colOnSurfaceVariant
-                                            Layout.preferredWidth: 22
-                                        }
-                                        StyledProgressBar {
-                                            value: ClaudeUsage.sevenDayUsedPercentage
-                                            valueBarWidth: 160
-                                            valueBarHeight: 6
-                                            valueBarGap: 0
-                                            trackColor: Appearance.colors.colLayer2
-                                            highlightColor: ClaudeUsage.sevenDayUsedPercentage > 0.8
-                                                ? Appearance.colors.colError
-                                                : Appearance.colors.colPrimary
-                                        }
-                                        StyledText {
-                                            text: Math.round(ClaudeUsage.sevenDayUsedPercentage * 100) + "%"
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colOnSurface
-                                            Layout.preferredWidth: 34
-                                        }
-                                        StyledText {
-                                            readonly property string _date: ClaudeUsage.formatResetDate(ClaudeUsage.sevenDayResetsAt)
-                                            text: ClaudeUsage.formatResetAt(ClaudeUsage.sevenDayResetsAt) + (_date ? " · " + _date : "")
-                                            font.pixelSize: Appearance.font.pixelSize.smaller
-                                            color: Appearance.colors.colOutline
-                                        }
-                                    }
-
-                                    Item { Layout.fillWidth: true }
                                 }
 
                             } // overviewCol
@@ -1301,13 +1371,6 @@ while p > 1 and p not in s:
                                                         : "PID " + modelData.pid
                                                     font.pixelSize: Appearance.font.pixelSize.smaller
                                                     color: Appearance.colors.colOnSurfaceVariant
-                                                }
-
-                                                StyledText {
-                                                    visible: (modelData.email ?? "") !== ""
-                                                    text: modelData.email ?? ""
-                                                    font.pixelSize: Appearance.font.pixelSize.smaller
-                                                    color: Appearance.colors.colOutline
                                                 }
 
                                                 StyledText {
