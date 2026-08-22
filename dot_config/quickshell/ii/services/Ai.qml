@@ -342,14 +342,19 @@ Singleton {
     }
     property ApiStrategy currentApiStrategy: apiStrategies[models[currentModelId]?.api_format || "openai"]
 
+    function mergeExtraModels() {
+        (Config?.options.ai?.extraModels ?? []).forEach(model => {
+            const safeModelName = root.safeModelName(model["model"]);
+            root.addModel(safeModelName, model)
+        });
+        root.modelList = Object.keys(root.models);
+    }
+
     Connections {
         target: Config
         function onReadyChanged() {
             if (!Config.ready) return;
-            (Config?.options.ai?.extraModels ?? []).forEach(model => {
-                const safeModelName = root.safeModelName(model["model"]);
-                root.addModel(safeModelName, model)
-            });
+            root.mergeExtraModels();
         }
     }
 
@@ -357,6 +362,7 @@ Singleton {
     property string pendingFilePath: ""
 
     Component.onCompleted: {
+        if (Config.ready) root.mergeExtraModels();
         setModel(currentModelId, false, false); // Do necessary setup for model
     }
 
@@ -383,7 +389,9 @@ Singleton {
     }
 
     function addModel(modelName, data) {
-        root.models[modelName] = aiModelComponent.createObject(this, data);
+        const newModels = Object.assign({}, root.models);
+        newModels[modelName] = aiModelComponent.createObject(this, data);
+        root.models = newModels; // Reassign (not mutate) so bindings on `models` react
     }
 
     Process {
@@ -398,6 +406,7 @@ Singleton {
                     root.modelList = [...root.modelList, ...dataJson];
                     dataJson.forEach(model => {
                         const safeModelName = root.safeModelName(model);
+                        if (root.models[safeModelName]) return; // Don't clobber a manually configured extraModels entry
                         root.addModel(safeModelName, {
                             "name": guessModelName(model),
                             "icon": guessModelLogo(model),
@@ -413,6 +422,30 @@ Singleton {
 
                 } catch (e) {
                     console.log("Could not fetch Ollama models:", e);
+                }
+            }
+        }
+    }
+
+    Process {
+        id: ollamaWarmCheck
+        property string pendingModel: ""
+        running: false
+        command: ["bash", "-c", "curl -s --max-time 2 http://localhost:11434/api/ps"]
+        function check(modelName) {
+            ollamaWarmCheck.pendingModel = modelName;
+            ollamaWarmCheck.running = true;
+        }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const loaded = JSON.parse(text)?.models ?? [];
+                    const isWarm = loaded.some(m => m.name === ollamaWarmCheck.pendingModel || m.model === ollamaWarmCheck.pendingModel);
+                    if (!isWarm) {
+                        root.addMessage(Translation.tr("⏳ Loading model into memory, first reply may take a bit longer..."), root.interfaceRole);
+                    }
+                } catch (e) {
+                    // Ollama not reachable or bad response; say nothing
                 }
             }
         }
@@ -516,7 +549,8 @@ Singleton {
 
     function setModel(modelId, feedback = true, setPersistentState = true) {
         if (!modelId) modelId = ""
-        modelId = modelId.toLowerCase()
+        const lowerModelId = modelId.toLowerCase()
+        modelId = modelList.find(id => id.toLowerCase() === lowerModelId) ?? lowerModelId
         if (modelList.indexOf(modelId) !== -1) {
             const model = models[modelId]
             // See if policy prevents online models
@@ -629,7 +663,9 @@ Singleton {
 
             // Fetch API keys if needed
             if (model?.requires_key && !KeyringStorage.loaded) KeyringStorage.fetchKeyringData();
-            
+
+            if (model?.endpoint?.includes("localhost:11434")) ollamaWarmCheck.check(model.model);
+
             requester.currentStrategy = root.currentApiStrategy;
             requester.currentStrategy.reset(); // Reset strategy state
 
