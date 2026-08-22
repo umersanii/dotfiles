@@ -7,7 +7,6 @@ import Quickshell.Io
 
 QuickToggleModel {
     id: root
-    name: Translation.tr("Tailscale")
     icon: "vpn_lock"
     toggled: false
     available: false
@@ -16,12 +15,21 @@ QuickToggleModel {
     property var accountList: []
     property int currentIndex: -1
 
+    name: {
+        if (currentIndex >= 0 && currentIndex < accountList.length)
+            return Translation.tr("Tailscale") + " (" + accountList[currentIndex].id + ")"
+        return Translation.tr("Tailscale")
+    }
     statusText: {
         if (currentIndex >= 0 && currentIndex < accountList.length)
             return accountList[currentIndex].account.split("@")[0]
         return toggled ? Translation.tr("On") : Translation.tr("Off")
     }
-    tooltipText: Translation.tr("Tailscale VPN | Click text to switch account")
+    tooltipText: {
+        if (currentIndex >= 0 && currentIndex < accountList.length)
+            return Translation.tr("Tailscale VPN | %1 | Click text to switch account").arg(accountList[currentIndex].id)
+        return Translation.tr("Tailscale VPN | Click text to switch account")
+    }
     hasMenu: false
 
     mainAction: () => {
@@ -117,24 +125,35 @@ QuickToggleModel {
     Process {
         id: tsUp
         command: ["sudo", "tailscale", "up", "--timeout=10s", "--reset", "--operator=" + Quickshell.env("USER")]
+        property string stdoutText: ""
+        property string stderrText: ""
         stdout: StdioCollector {
             id: tsUpCollector
-            onStreamFinished: {
-                // If output contains a login URL, open it in the browser
-                const text = tsUpCollector.text
-                const urlMatch = text.match(/https:\/\/\S+/)
-                if (urlMatch) {
-                    Quickshell.execDetached(["xdg-open", urlMatch[0]])
-                }
-            }
+            onStreamFinished: tsUp.stdoutText = tsUpCollector.text
+        }
+        stderr: StdioCollector {
+            id: tsUpErrCollector
+            onStreamFinished: tsUp.stderrText = tsUpErrCollector.text
         }
         onStarted: root.toggled = true
         onExited: (exitCode) => {
+            // Login URL is printed to stderr when re-auth is required
+            const combined = tsUp.stdoutText + "\n" + tsUp.stderrText
+            const urlMatch = combined.match(/https:\/\/\S+/)
+            if (urlMatch) {
+                Quickshell.execDetached(["xdg-open", urlMatch[0]])
+            }
             if (exitCode !== 0) {
                 root.toggled = false
-                Quickshell.execDetached(["notify-send", "Tailscale",
-                    "Failed to connect — run 'tailscale up' in terminal if re-auth is needed",
-                    "-a", "Shell"])
+                if (urlMatch) {
+                    Quickshell.execDetached(["notify-send", "Tailscale",
+                        "Re-authentication required — opening login page in browser",
+                        "-a", "Shell"])
+                } else {
+                    Quickshell.execDetached(["notify-send", "Tailscale",
+                        "Failed to connect — run 'tailscale up' in terminal if re-auth is needed",
+                        "-a", "Shell"])
+                }
             }
             refreshTimer.restart()
         }
