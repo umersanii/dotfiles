@@ -20,27 +20,38 @@ Singleton {
     // used to project when usage will hit 100% at the current burn rate.
     property var paceSamples: []
     // epoch ms projection of when 100% is reached at current pace, or 0 if
-    // there aren't enough samples / usage is flat / it lands past the reset
+    // there aren't enough samples yet / usage is flat (no projection possible)
     property real paceExhaustionAt: 0
+    // true when paceExhaustionAt falls before the window's natural reset —
+    // i.e. you're on track to actually hit the cap early
+    property bool paceWillExhaustEarly: false
 
     function recomputePace() {
         const samples = root.paceSamples
-        if (samples.length < 2) { root.paceExhaustionAt = 0; return }
+        if (samples.length < 2) {
+            root.paceExhaustionAt = 0
+            root.paceWillExhaustEarly = false
+            return
+        }
 
         const first = samples[0]
         const last  = samples[samples.length - 1]
         const dtMin = (last.t - first.t) / 60000
         const dPct  = last.pct - first.pct
 
-        if (dtMin <= 0 || dPct <= 0) { root.paceExhaustionAt = 0; return }
+        if (dtMin <= 0 || dPct <= 0) {
+            root.paceExhaustionAt = 0
+            root.paceWillExhaustEarly = false
+            return
+        }
 
         const ratePerMin = dPct / dtMin
         const minutesToFull = (100 - last.pct) / ratePerMin
         const projected = last.t + minutesToFull * 60000
 
         const resetMs = new Date(root.fiveHourResetsAt).getTime()
-        // Only meaningful if we'd hit 100% before the window naturally resets
-        root.paceExhaustionAt = (!isNaN(resetMs) && projected < resetMs) ? projected : 0
+        root.paceExhaustionAt = projected
+        root.paceWillExhaustEarly = !isNaN(resetMs) && projected < resetMs
     }
 
     function recordSample(pct, resetsAt) {
@@ -81,19 +92,24 @@ Singleton {
         if (!raw) return
         try {
             const d = JSON.parse(raw)
-            const sessionUsage   = d?.sessionUsage ?? 0
-            const sessionResetAt = d?.sessionResetAt ?? ""
+            // current_usage.json is the raw Claude Code statusline payload —
+            // rate_limits come straight from Claude Code itself, no network
+            // fetch involved, so this can't go stale from an API timeout.
+            const fiveHour   = d?.rate_limits?.five_hour ?? null
+            const sevenDay   = d?.rate_limits?.seven_day ?? null
+            const sessionUsage   = fiveHour?.used_percentage ?? 0
+            const sessionResetAt = fiveHour?.resets_at ? new Date(fiveHour.resets_at * 1000).toISOString() : ""
             root.fiveHourUsedPercentage = sessionUsage / 100
-            root.sevenDayUsedPercentage = (d?.weeklyUsage ?? 0) / 100
+            root.sevenDayUsedPercentage = (sevenDay?.used_percentage ?? 0) / 100
             root.fiveHourResetsAt = sessionResetAt
-            root.sevenDayResetsAt = d?.weeklyResetAt ?? ""
+            root.sevenDayResetsAt = sevenDay?.resets_at ? new Date(sevenDay.resets_at * 1000).toISOString() : ""
             if (sessionResetAt) root.recordSample(sessionUsage, sessionResetAt)
         } catch (e) {
             console.warn("[ClaudeUsage] parse error:", e.message)
         }
     }
 
-    // "in Xh Ym" / "in Ym" until paceExhaustionAt, or "" if no projection
+    // "Xh Ym" / "Ym" until paceExhaustionAt, or "" if no projection yet
     function formatPaceEta() {
         if (!root.paceExhaustionAt) return ""
         const diff = root.paceExhaustionAt - Date.now()
@@ -102,6 +118,12 @@ Singleton {
         const h = Math.floor(totalMin / 60)
         const m = totalMin % 60
         return h > 0 ? `${h}h ${m}m` : `${m}m`
+    }
+
+    // Wall-clock HH:MM for paceExhaustionAt, or "" if no projection yet
+    function formatPaceAtTime() {
+        if (!root.paceExhaustionAt) return ""
+        return new Date(root.paceExhaustionAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
     }
 
     Timer {
@@ -113,7 +135,7 @@ Singleton {
 
     FileView {
         id: usageFile
-        path: Qt.resolvedUrl(FileUtils.trimFileProtocol(`${Directories.genericCache}/ccstatusline/usage.json`))
+        path: Qt.resolvedUrl(FileUtils.trimFileProtocol(`${Directories.home}/.claude/current_usage.json`))
         watchChanges: true
         onFileChanged: {
             this.reload()
