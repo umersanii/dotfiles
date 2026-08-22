@@ -22,7 +22,7 @@ QuickToggleModel {
     }
     statusText: {
         if (currentIndex >= 0 && currentIndex < accountList.length)
-            return accountList[currentIndex].account.split("@")[0]
+            return accountList[currentIndex].account
         return toggled ? Translation.tr("On") : Translation.tr("Off")
     }
     tooltipText: {
