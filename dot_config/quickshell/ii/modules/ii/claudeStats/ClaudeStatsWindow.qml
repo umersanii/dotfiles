@@ -1048,6 +1048,19 @@ while p > 1 and p not in s:
                                             font.pixelSize: Appearance.font.pixelSize.smaller
                                             color: Appearance.colors.colOutline
                                         }
+                                        StyledText {
+                                            visible: ClaudeUsage.paceExhaustionAt > 0
+                                            text: "⚠ pace: ~" + ClaudeUsage.formatPaceEta()
+                                            font.pixelSize: Appearance.font.pixelSize.smaller
+                                            color: Appearance.colors.colError
+
+                                            HoverHandler { id: paceHover }
+                                            ToolTip {
+                                                visible: paceHover.hovered
+                                                text: "At your current burn rate, you'll likely hit the 5h cap before it naturally resets"
+                                                delay: 300
+                                            }
+                                        }
                                     }
 
                                     // 7-day bar
