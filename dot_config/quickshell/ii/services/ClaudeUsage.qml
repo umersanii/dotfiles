@@ -34,23 +34,43 @@ Singleton {
             return
         }
 
-        const first = samples[0]
-        const last  = samples[samples.length - 1]
-        const dtMin = (last.t - first.t) / 60000
-        const dPct  = last.pct - first.pct
+        // Recency-weighted burn rate: compute %/min for each consecutive
+        // sample pair, weighting later (more recent) intervals more heavily.
+        // This lets the estimate compound toward the current trend instead
+        // of flattening it out with a single first-vs-last average.
+        let weightedRateSum = 0
+        let weightSum = 0
+        for (let i = 1; i < samples.length; i++) {
+            const dt = (samples[i].t - samples[i - 1].t) / 60000
+            if (dt <= 0) continue
+            const rate = (samples[i].pct - samples[i - 1].pct) / dt
+            const weight = i
+            weightedRateSum += rate * weight
+            weightSum += weight
+        }
 
-        if (dtMin <= 0 || dPct <= 0) {
+        if (weightSum <= 0) {
             root.paceExhaustionAt = 0
             root.paceWillExhaustEarly = false
             return
         }
 
-        const ratePerMin = dPct / dtMin
+        const ratePerMin = weightedRateSum / weightSum
+        if (ratePerMin <= 0) {
+            root.paceExhaustionAt = 0
+            root.paceWillExhaustEarly = false
+            return
+        }
+
+        const last = samples[samples.length - 1]
         const minutesToFull = (100 - last.pct) / ratePerMin
         const projected = last.t + minutesToFull * 60000
 
+        // Never project an exhaustion time past the window's own natural
+        // reset — once it resets the 0-100% cap no longer applies, so a
+        // projection beyond that (e.g. "8h" for a 5h window) isn't meaningful.
         const resetMs = new Date(root.fiveHourResetsAt).getTime()
-        root.paceExhaustionAt = projected
+        root.paceExhaustionAt = (!isNaN(resetMs) && projected > resetMs) ? resetMs : projected
         root.paceWillExhaustEarly = !isNaN(resetMs) && projected < resetMs
     }
 
