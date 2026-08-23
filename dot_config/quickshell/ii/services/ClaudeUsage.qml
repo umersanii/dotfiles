@@ -28,41 +28,59 @@ Singleton {
 
     function recomputePace() {
         const samples = root.paceSamples
-        if (samples.length < 2) {
-            root.paceExhaustionAt = 0
-            root.paceWillExhaustEarly = false
-            return
-        }
-
-        // Recency-weighted burn rate: compute %/min for each consecutive
-        // sample pair, weighting later (more recent) intervals more heavily.
-        // This lets the estimate compound toward the current trend instead
-        // of flattening it out with a single first-vs-last average.
-        let weightedRateSum = 0
-        let weightSum = 0
-        for (let i = 1; i < samples.length; i++) {
-            const dt = (samples[i].t - samples[i - 1].t) / 60000
-            if (dt <= 0) continue
-            const rate = (samples[i].pct - samples[i - 1].pct) / dt
-            const weight = i
-            weightedRateSum += rate * weight
-            weightSum += weight
-        }
-
-        if (weightSum <= 0) {
-            root.paceExhaustionAt = 0
-            root.paceWillExhaustEarly = false
-            return
-        }
-
-        const ratePerMin = weightedRateSum / weightSum
-        if (ratePerMin <= 0) {
+        if (samples.length < 3) {
             root.paceExhaustionAt = 0
             root.paceWillExhaustEarly = false
             return
         }
 
         const last = samples[samples.length - 1]
+        const first = samples[0]
+        // A couple of samples seconds apart produce wildly unstable slopes
+        // once extrapolated over hours — require a real time baseline first.
+        if ((last.t - first.t) < 3 * 60000) {
+            root.paceExhaustionAt = 0
+            root.paceWillExhaustEarly = false
+            return
+        }
+
+        // Recency-weighted linear regression over ALL samples (not just
+        // adjacent-pair deltas). A single bursty jump in used_percentage
+        // (e.g. one large turn) gets diluted by the rest of the trend line
+        // instead of single-handedly setting the rate, while the recency
+        // decay still lets the slope lean toward the current pace.
+        const halfLifeMs = 15 * 60000
+        let sw = 0, swt = 0, swp = 0
+        for (const s of samples) {
+            const w = Math.pow(0.5, (last.t - s.t) / halfLifeMs)
+            sw += w
+            swt += w * s.t
+            swp += w * s.pct
+        }
+        const tMean = swt / sw
+        const pMean = swp / sw
+
+        let num = 0, den = 0
+        for (const s of samples) {
+            const w = Math.pow(0.5, (last.t - s.t) / halfLifeMs)
+            const dt = s.t - tMean
+            num += w * dt * (s.pct - pMean)
+            den += w * dt * dt
+        }
+
+        if (den <= 0) {
+            root.paceExhaustionAt = 0
+            root.paceWillExhaustEarly = false
+            return
+        }
+
+        const ratePerMin = (num / den) * 60000
+        if (ratePerMin <= 0) {
+            root.paceExhaustionAt = 0
+            root.paceWillExhaustEarly = false
+            return
+        }
+
         const minutesToFull = (100 - last.pct) / ratePerMin
         const projected = last.t + minutesToFull * 60000
 
@@ -76,10 +94,22 @@ Singleton {
 
     function recordSample(pct, resetsAt) {
         const now = Date.now()
-        // New window (resetsAt changed) → drop old samples
+        // Fresh singleton (e.g. quickshell just reloaded/restarted) — try to
+        // resume this window's samples from disk instead of starting blank.
+        if (root._lastResetsAt === "" && root._persistedResetsAt === resetsAt && root._persistedSamples.length > 0) {
+            root.paceSamples = root._persistedSamples
+            root._lastResetsAt = resetsAt
+        }
+        // New window (resetsAt changed) → drop old samples and clear the
+        // stale on-disk cache right away, so the old window's data can't
+        // bleed into the new one even if we crash/restart before the next
+        // write below lands.
         if (root._lastResetsAt !== resetsAt) {
             root._lastResetsAt = resetsAt
             root.paceSamples = []
+            root._persistedResetsAt = ""
+            root._persistedSamples = []
+            paceFileView.setText(JSON.stringify({ resetsAt: resetsAt, samples: [] }))
         }
         const samples = root.paceSamples.slice(0)
         samples.push({ t: now, pct: pct })
@@ -87,8 +117,11 @@ Singleton {
         if (samples.length > 30) samples.shift()
         root.paceSamples = samples
         root.recomputePace()
+        paceFileView.setText(JSON.stringify({ resetsAt: resetsAt, samples: samples }))
     }
     property string _lastResetsAt: ""
+    property string _persistedResetsAt: ""
+    property var    _persistedSamples: []
 
     function formatResetAt(isoString) {
         if (!isoString) return "?"
@@ -162,5 +195,34 @@ Singleton {
             readTimer.start()
         }
         onLoaded: root.parseUsage()
+    }
+
+    // Persists paceSamples for the current window to disk so the pace
+    // estimate survives a quickshell reload/restart instead of resetting.
+    FileView {
+        id: paceFileView
+        path: Qt.resolvedUrl(FileUtils.trimFileProtocol(`${Directories.genericCache}/claude-stats/pace-samples.json`))
+        onLoaded: {
+            try {
+                const d = JSON.parse(paceFileView.text())
+                if (d && d.resetsAt && Array.isArray(d.samples)) {
+                    root._persistedResetsAt = d.resetsAt
+                    root._persistedSamples = d.samples
+                    // Usage may have already parsed a first sample for this same
+                    // window before this file finished loading — resume now.
+                    if (root.fiveHourResetsAt === d.resetsAt && root.paceSamples.length <= 1) {
+                        root.paceSamples = d.samples
+                        root._lastResetsAt = d.resetsAt
+                        root.recomputePace()
+                    }
+                }
+            } catch (e) {
+                console.warn("[ClaudeUsage] pace cache parse error:", e.message)
+            }
+        }
+        onLoadFailed: (error) => {
+            if (error !== FileViewError.FileNotFound)
+                console.warn("[ClaudeUsage] pace cache load error:", error)
+        }
     }
 }
