@@ -193,8 +193,8 @@ PanelWindow {
         running: isRecording
         command: ["pidof", "wf-recorder"]
         onExited: (exitCode, exitStatus) => {
-            root.preparationDone = !screenshotProc.running
             root.recordingShouldStop = (exitCode === 0);
+            root.preparationDone = !screenshotProc.running
         }
     }
     property bool preparationDone: false
