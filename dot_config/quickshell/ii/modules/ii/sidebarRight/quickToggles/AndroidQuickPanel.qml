@@ -107,6 +107,7 @@ AbstractQuickPanel {
                             onOpenNightLightDialog: root.openNightLightDialog()
                             onOpenWifiDialog: root.openWifiDialog()
                             onOpenHotspotDialog: root.openHotspotDialog()
+                            onOpenTailscaleDialog: root.openTailscaleDialog()
                         }
                     }
                 }

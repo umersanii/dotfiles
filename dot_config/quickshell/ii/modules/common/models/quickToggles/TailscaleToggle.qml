@@ -30,7 +30,7 @@ QuickToggleModel {
             return Translation.tr("Tailscale VPN | %1 | Click text to switch account").arg(accountList[currentIndex].id)
         return Translation.tr("Tailscale VPN | Click text to switch account")
     }
-    hasMenu: false
+    hasMenu: true
 
     mainAction: () => {
         if (root.toggled) {
@@ -40,6 +40,13 @@ QuickToggleModel {
         }
     }
 
+    function switchToAccount(id) {
+        if (id === undefined || id === null || id === "") return
+        if (root.currentIndex >= 0 && root.accountList[root.currentIndex]?.id === id) return
+        switchProc.profileId = id
+        switchProc.running = true
+    }
+
     altAction: () => {
         if (root.accountList.length < 2) {
             Quickshell.execDetached(["notify-send", "Tailscale",
@@ -47,8 +54,7 @@ QuickToggleModel {
             return
         }
         const nextIdx = (root.currentIndex + 1) % root.accountList.length
-        switchProc.profileId = root.accountList[nextIdx].id
-        switchProc.running = true
+        root.switchToAccount(root.accountList[nextIdx].id)
     }
 
     Timer {
