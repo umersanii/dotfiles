@@ -21,6 +21,7 @@ DelegateChooser {
     signal openWifiDialog()
     signal openHotspotDialog()
     signal openTailscaleDialog()
+    signal openProtonVpnDialog()
 
     role: "type"
 
@@ -96,6 +97,9 @@ DelegateChooser {
         baseCellHeight: root.baseCellHeight
         cellSpacing: root.spacing
         cellSize: modelData.size
+        onOpenMenu: {
+            root.openProtonVpnDialog()
+        }
     } }
 
     DelegateChoice { roleValue: "colorPicker"; AndroidColorPickerToggle {
