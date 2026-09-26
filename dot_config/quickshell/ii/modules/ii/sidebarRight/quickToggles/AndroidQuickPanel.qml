@@ -108,6 +108,7 @@ AbstractQuickPanel {
                             onOpenWifiDialog: root.openWifiDialog()
                             onOpenHotspotDialog: root.openHotspotDialog()
                             onOpenTailscaleDialog: root.openTailscaleDialog()
+                            onOpenProtonVpnDialog: root.openProtonVpnDialog()
                         }
                     }
                 }
