@@ -21,7 +21,12 @@ QuickToggleModel {
         if (toggled && server.length > 0) return server
         return toggled ? Translation.tr("On") : Translation.tr("Off")
     }
-    tooltipText: Translation.tr("Proton VPN | Fastest free server")
+    tooltipText: Translation.tr("Proton VPN | Right-click to pick a country")
+    hasMenu: true
+
+    // Countries with free-tier servers: [{ code: "NL", count: 40, cities: "Amsterdam" }]
+    property var freeCountries: []
+    readonly property string currentCountry: server.split("-")[0]
 
     mainAction: () => {
         if (root.busy) return
@@ -30,9 +35,17 @@ QuickToggleModel {
             root.toggled = false
             disconnectProc.running = true
         } else {
-            root.toggled = true
-            connectProc.running = true
+            root.connectTo("")
         }
+    }
+
+    // Empty code = fastest free server anywhere. Proton switches servers
+    // in place, so no disconnect is needed when already connected
+    function connectTo(code) {
+        root.busy = true
+        root.toggled = true
+        connectProc.country = code
+        connectProc.running = true
     }
 
     Timer {
@@ -66,9 +79,39 @@ QuickToggleModel {
         onExited: (exitCode) => root.available = exitCode === 0
     }
 
+    // Proton's CLI has no free-server listing, so read tier-0 servers from its cache
+    Process {
+        id: countriesProc
+        running: true
+        command: ["python3", "-c", `
+import json, os
+d = json.load(open(os.path.expanduser("~/.cache/Proton/VPN/serverlist.json")))
+out = {}
+for s in d["LogicalServers"]:
+    if s.get("Tier") != 0: continue
+    c = out.setdefault(s["ExitCountry"], {"code": s["ExitCountry"], "count": 0, "cities": []})
+    c["count"] += 1
+    if s.get("City") and s["City"] not in c["cities"]: c["cities"].append(s["City"])
+res = sorted(out.values(), key=lambda c: -c["count"])
+for c in res: c["cities"] = ", ".join(c["cities"])
+print(json.dumps(res))
+`]
+        stdout: StdioCollector {
+            id: countriesCollector
+            onStreamFinished: {
+                try {
+                    root.freeCountries = JSON.parse(countriesCollector.text)
+                } catch (e) {}
+            }
+        }
+    }
+
     Process {
         id: connectProc
-        command: ["timeout", "30", "protonvpn", "connect"]
+        property string country: ""
+        command: country.length > 0
+            ? ["timeout", "30", "protonvpn", "connect", "--country", country]
+            : ["timeout", "30", "protonvpn", "connect"]
         onExited: (exitCode) => {
             root.busy = false
             if (exitCode !== 0) {
