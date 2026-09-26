@@ -15,6 +15,7 @@ import qs.modules.ii.sidebarRight.quickToggles.classicStyle
 import qs.modules.ii.sidebarRight.bluetoothDevices
 import qs.modules.ii.sidebarRight.hotspot
 import qs.modules.ii.sidebarRight.nightLight
+import qs.modules.ii.sidebarRight.protonVpn
 import qs.modules.ii.sidebarRight.tailscale
 import qs.modules.ii.sidebarRight.volumeMixer
 import qs.modules.ii.sidebarRight.wifiNetworks
@@ -31,6 +32,7 @@ Item {
     property bool showNightLightDialog: false
     property bool showWifiDialog: false
     property bool showTailscaleDialog: false
+    property bool showProtonVpnDialog: false
     property bool editMode: false
 
     Connections {
@@ -43,6 +45,7 @@ Item {
                 root.showAudioOutputDialog = false;
                 root.showAudioInputDialog = false;
                 root.showTailscaleDialog = false;
+                root.showProtonVpnDialog = false;
             }
         }
     }
@@ -189,6 +192,11 @@ Item {
         dialog: TailscaleDialog {}
     }
 
+    ToggleDialog {
+        shownPropertyString: "showProtonVpnDialog"
+        dialog: ProtonVpnDialog {}
+    }
+
     component ToggleDialog: Loader {
         id: toggleDialogLoader
         required property string shownPropertyString
@@ -245,6 +253,9 @@ Item {
             }
             function onOpenTailscaleDialog() {
                 root.showTailscaleDialog = true;
+            }
+            function onOpenProtonVpnDialog() {
+                root.showProtonVpnDialog = true;
             }
         }
     }
