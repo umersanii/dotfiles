@@ -14,4 +14,5 @@ Rectangle {
     signal openWifiDialog()
     signal openHotspotDialog()
     signal openTailscaleDialog()
+    signal openProtonVpnDialog()
 }
