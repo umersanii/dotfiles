@@ -151,6 +151,14 @@ Singleton {
                     property real width: 350
                     property real height: 400
                 }
+                property JsonObject tasks: JsonObject {
+                    property bool pinned: false
+                    property bool clickthrough: false
+                    property real x: 40
+                    property real y: 42
+                    property real width: 380
+                    property real height: 460
+                }
             }
 
             property JsonObject timer: JsonObject {

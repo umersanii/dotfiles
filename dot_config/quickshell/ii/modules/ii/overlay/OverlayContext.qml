@@ -14,6 +14,7 @@ Singleton {
         { identifier: "notes", materialSymbol: "note_stack" },
         { identifier: "volumeMixer", materialSymbol: "volume_up" },
         { identifier: "linkBoard", materialSymbol: "bookmark" },
+        { identifier: "tasks", materialSymbol: "task_alt" },
     ]
     
     readonly property bool hasPinnedWidgets: root.pinnedWidgetIdentifiers.length > 0
