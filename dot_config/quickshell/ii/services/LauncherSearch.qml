@@ -294,8 +294,8 @@ Singleton {
                     if (!entry.runInTerminal)
                         entry.execute();
                     else {
-                        // Probably needs more proper escaping, but this will do for now
-                        Quickshell.execDetached(["bash", '-c', `${Config.options.apps.terminal} -e '${StringUtils.shellSingleQuoteEscape(entry.command.join(' '))}'`]);
+                        // Pass argv straight through so multi-arg Exec lines (e.g. sh -c "...") keep their quoting
+                        Quickshell.execDetached(Config.options.apps.terminal.split(" ").filter(s => s.length > 0).concat(["-e"], entry.command));
                     }
                 },
                 comment: entry.comment,
@@ -311,7 +311,7 @@ Singleton {
                             if (!action.runInTerminal)
                                 action.execute();
                             else {
-                                Quickshell.execDetached(["bash", '-c', `${Config.options.apps.terminal} -e '${StringUtils.shellSingleQuoteEscape(action.command.join(' '))}'`]);
+                                Quickshell.execDetached(Config.options.apps.terminal.split(" ").filter(s => s.length > 0).concat(["-e"], action.command));
                             }
                         }
                     });
