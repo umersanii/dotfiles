@@ -252,6 +252,7 @@ PanelWindow {
         if (root.regionWidth <= 0 || root.regionHeight <= 0) {
             console.warn("[Region Selector] Invalid region size, skipping snip.");
             root.dismiss();
+            return;
         }
 
         // Clamp region to screen bounds
@@ -268,7 +269,17 @@ PanelWindow {
         const screenshotDir = Config.options.screenSnip.savePath !== "" ? //
             Config.options.screenSnip.savePath : "";
         var screenshotAction = root.getScreenshotAction();
-        const command = ScreenshotAction.getCommand(
+        // wf-recorder --geometry wants global logical coords (like slurp), not monitor-local physical pixels
+        const recording = screenshotAction === ScreenshotAction.Action.Record || screenshotAction === ScreenshotAction.Action.RecordWithSound;
+        const command = recording ? ScreenshotAction.getCommand(
+            root.screen.x + root.regionX, //
+            root.screen.y + root.regionY, //
+            root.regionWidth, //
+            root.regionHeight, //
+            root.screenshotPath, //
+            screenshotAction, //
+            screenshotDir
+        ) : ScreenshotAction.getCommand(
             root.regionX * root.monitorScale, //
             root.regionY * root.monitorScale, //
             root.regionWidth * root.monitorScale,// 
