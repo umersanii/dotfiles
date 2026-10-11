@@ -9,3 +9,12 @@
 config.yaml
 # Mimic-docs: lives in the sibling repo ~/c0d3/Mimic/sim/models/hand/
 generate_hand.py
+
+# muser: snapshot exists only while music-theme-sync is running
+~/.cache/muser/base-colors.json
+
+# edgevision_mobile: expo-screen-orientation sources inside node_modules
+OrientationLock.kt
+OrientationAttr.kt
+# edgevision_mobile timestamps.md: inside the superseded 2026-09-24 history entry
+utils/activityGrouping.ts
