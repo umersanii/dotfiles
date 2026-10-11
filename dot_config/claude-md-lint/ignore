@@ -1,0 +1,11 @@
+# Tokens claude-md-lint should never flag (one per line, exact backticked text).
+# Use for paths on other machines or files that only exist at runtime.
+
+# EdgeVision TURN server (remote EC2 host, not this machine)
+/usr/local/bin/turnserver
+/etc/coturn/turnserver.conf
+
+# Mimic: refers to the upstream source repo's file, not ours
+config.yaml
+# Mimic-docs: lives in the sibling repo ~/c0d3/Mimic/sim/models/hand/
+generate_hand.py

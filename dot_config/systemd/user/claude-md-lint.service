@@ -1,0 +1,8 @@
+[Unit]
+Description=Check Claude instruction files for stale path references
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/claude-md-lint --notify --quiet
+# findings exit 1; that's a report, not a failure
+SuccessExitStatus=1
