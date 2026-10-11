@@ -54,6 +54,18 @@ When editing configs directly in `~/.config/`, run `chezmoi re-add <file>` after
 - Bar icon feedback: `~/.config/quickshell/ii/services/Ai.qml` exposes `isGenerating` (aliased to the request `Process.running`); `~/.config/quickshell/ii/modules/ii/bar/LeftSidebarButton.qml` uses `Ai.isGenerating && Ai.currentModelId.startsWith("gemma")` to pulse the top-left icon size/color (blue `#4FC3F7`) and give it a stop-start spin while a Gemma response is generating
 - Ollama auto-unloads idle models after 5 min (`--keepalive` to override); avoid loading it when other GPU/RAM-heavy work is running to prevent swap thrashing
 
+## Rice Design Rules
+
+The rice is **monochrome: the UI is black & white; color comes only from content or errors.** Check every visual change against this.
+
+- **Allowed color**: content-derived accents (muser album-art accent via `cava-colors.py`, wallpaper/media itself) and error/destructive states (red `#ff5555`). Nothing else gets hue.
+- **Hierarchy by brightness, not hue**: most important = white, secondary = mid-grey `#8a8a8a`, tertiary = dark `#262626`. Use exact hex values, never named colors (`green`, `cyan`) that resolve through a terminal palette.
+- **Single source of truth per surface**: hardcoded B&W overrides win; matugen must not also generate for that surface (e.g. `enableQtApps: false` in `illogical-impulse/config.json` because Qt uses the hand-made `~/.local/share/color-schemes/BlackWhite.colors`).
+- **Consistency checklist** when touching theming: GTK3/4 (`adw-gtk3-dark` + B&W `gtk.css`), Qt/KDE (`BlackWhite` scheme in `kdeglobals`), Hyprland borders (`hypr/custom/colors-override.conf`), Fuzzel, Starship, cursor (Bibata-Modern-Classic 24 via `XCURSOR_*` in `hypr/custom/env.conf` + `~/.icons/default`), icons (Tela-circle-black).
+- **Readability over effects**: windows stay opaque (`custom/general.conf`); focus is shown by `dim_inactive`, not transparency.
+- **Shape & motion**: rounding 18 / `rounding_power 2.4`, Material 3 expressive curves, exits faster than entrances. Keep new surfaces in line.
+- **Kitty is out of scope** for theme changes unless explicitly asked.
+
 ## Known Issues & Fixes
 
 ### External monitor shows black screen after switching from mirror to extended
