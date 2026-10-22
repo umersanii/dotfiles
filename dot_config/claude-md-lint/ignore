@@ -18,3 +18,5 @@ OrientationLock.kt
 OrientationAttr.kt
 # edgevision_mobile timestamps.md: inside the superseded 2026-09-24 history entry
 utils/activityGrouping.ts
+# EdgeVision_Core: exists only on branch sani/turn-profile-flag (documented in its CLAUDE.md)
+api/rtsp_passthrough.py
