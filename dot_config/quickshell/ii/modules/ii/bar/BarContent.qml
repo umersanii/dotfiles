@@ -512,6 +512,11 @@ Item { // Bar content region
                 }
             }
 
+            TailscaleButton {
+                Layout.alignment: Qt.AlignVCenter
+                visible: available
+            }
+
             KdeConnectButton {
                 id: kdeConnectButton
                 Layout.alignment: Qt.AlignVCenter
