@@ -362,14 +362,15 @@ Item { // Bar content region
                         currentIndex: (!weatherPrayerCycler.showWeather || (weatherPrayerCycler.bothActive && !weatherPrayerCycler.showingWeather)) ? 1 : 0
 
                         Loader {
-                            active: weatherPrayerCycler.showWeather
+                            // only the shown one is instantiated: a hidden-while-hovered MouseArea keeps containsMouse stuck (stuck popup)
+                            active: weatherPrayerCycler.showWeather && cyclerStack.currentIndex === 0
                             sourceComponent: WeatherBar {
                                 onPressed: if (weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle()
                             }
                         }
 
                         Loader {
-                            active: weatherPrayerCycler.showPrayer
+                            active: weatherPrayerCycler.showPrayer && cyclerStack.currentIndex === 1
                             sourceComponent: PrayerTimesBar {
                                 onPressed: if (weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle()
                             }
