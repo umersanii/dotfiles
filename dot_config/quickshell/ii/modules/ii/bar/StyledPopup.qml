@@ -13,7 +13,9 @@ LazyLoader {
     default property Item contentItem
     property real popupBackgroundMargin: 0
 
-    active: hoverTarget && hoverTarget.containsMouse
+    // `visible` guard: a MouseArea hidden while hovered (e.g. StackLayout swap in the
+    // weather/prayer cycler) never gets hover-leave, so containsMouse sticks true.
+    active: hoverTarget && hoverTarget.visible && hoverTarget.containsMouse
 
     component: PanelWindow {
         id: popupWindow
