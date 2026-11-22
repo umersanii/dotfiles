@@ -25,8 +25,8 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             implicitWidth: aiUsageRow.implicitWidth
             implicitHeight: aiUsageRow.implicitHeight
-            hoverEnabled: true
-            acceptedButtons: Qt.NoButton
+            hoverEnabled: !Config.options.bar.tooltips.clickToShow
+            acceptedButtons: Qt.LeftButton
 
             RowLayout {
                 id: aiUsageRow

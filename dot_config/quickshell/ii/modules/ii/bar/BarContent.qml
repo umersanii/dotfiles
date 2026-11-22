@@ -346,7 +346,7 @@ Item { // Bar content region
                     Timer {
                         id: cycleTimer
                         interval: 30000
-                        running: weatherPrayerCycler.bothActive
+                        running: weatherPrayerCycler.bothActive && !GlobalStates.barPopupOpen
                         repeat: true
                         onTriggered: weatherPrayerCycler.showingWeather = !weatherPrayerCycler.showingWeather
                     }
@@ -365,20 +365,16 @@ Item { // Bar content region
                             // only the shown one is instantiated: a hidden-while-hovered MouseArea keeps containsMouse stuck (stuck popup)
                             active: weatherPrayerCycler.showWeather && cyclerStack.currentIndex === 0
                             sourceComponent: WeatherBar {
-                                // quick click cycles; press-and-hold peeks the popup (clickToShow) without cycling
-                                property real pressedAt: 0
-                                onPressed: pressedAt = Date.now()
-                                onReleased: if (weatherPrayerCycler.bothActive && Date.now() - pressedAt < 250) weatherPrayerCycler.cycle()
+                                // left tap = popup, middle click = switch weather/prayer
+                                onClicked: mouse => { if (mouse.button === Qt.MiddleButton && weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle() }
                             }
                         }
 
                         Loader {
                             active: weatherPrayerCycler.showPrayer && cyclerStack.currentIndex === 1
                             sourceComponent: PrayerTimesBar {
-                                // quick click cycles; press-and-hold peeks the popup (clickToShow) without cycling
-                                property real pressedAt: 0
-                                onPressed: pressedAt = Date.now()
-                                onReleased: if (weatherPrayerCycler.bothActive && Date.now() - pressedAt < 250) weatherPrayerCycler.cycle()
+                                // left tap = popup, middle click = switch weather/prayer
+                                onClicked: mouse => { if (mouse.button === Qt.MiddleButton && weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle() }
                             }
                         }
                     }
