@@ -197,6 +197,17 @@ Singleton {
         onLoaded: root.parseUsage()
     }
 
+    // Logged-in account email, mirrored by ~/.local/bin/cc-account-email.sh
+    // (the ccstatusline widget) so we watch a tiny file, not ~/.claude.json.
+    property string accountEmail: ""
+    FileView {
+        id: accountFile
+        path: Qt.resolvedUrl(FileUtils.trimFileProtocol(`${Directories.home}/.claude/current_account.txt`))
+        watchChanges: true
+        onFileChanged: this.reload()
+        onLoaded: root.accountEmail = accountFile.text().trim()
+    }
+
     // Persists paceSamples for the current window to disk so the pace
     // estimate survives a quickshell reload/restart instead of resetting.
     FileView {
