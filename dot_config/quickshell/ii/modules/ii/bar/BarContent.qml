@@ -365,14 +365,20 @@ Item { // Bar content region
                             // only the shown one is instantiated: a hidden-while-hovered MouseArea keeps containsMouse stuck (stuck popup)
                             active: weatherPrayerCycler.showWeather && cyclerStack.currentIndex === 0
                             sourceComponent: WeatherBar {
-                                onPressed: if (weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle()
+                                // quick click cycles; press-and-hold peeks the popup (clickToShow) without cycling
+                                property real pressedAt: 0
+                                onPressed: pressedAt = Date.now()
+                                onReleased: if (weatherPrayerCycler.bothActive && Date.now() - pressedAt < 250) weatherPrayerCycler.cycle()
                             }
                         }
 
                         Loader {
                             active: weatherPrayerCycler.showPrayer && cyclerStack.currentIndex === 1
                             sourceComponent: PrayerTimesBar {
-                                onPressed: if (weatherPrayerCycler.bothActive) weatherPrayerCycler.cycle()
+                                // quick click cycles; press-and-hold peeks the popup (clickToShow) without cycling
+                                property real pressedAt: 0
+                                onPressed: pressedAt = Date.now()
+                                onReleased: if (weatherPrayerCycler.bothActive && Date.now() - pressedAt < 250) weatherPrayerCycler.cycle()
                             }
                         }
                     }
