@@ -28,6 +28,12 @@ StyledPopup {
             Column {
                 spacing: 4
                 StyledPopupValueRow {
+                    icon: "account_circle"
+                    label: Translation.tr("Account:")
+                    value: ClaudeUsage.accountEmail
+                    visible: ClaudeUsage.accountEmail !== ""
+                }
+                StyledPopupValueRow {
                     icon: "clock_loader_60"
                     label: Translation.tr("Used:")
                     value: root.formatPercent(ClaudeUsage.fiveHourUsedPercentage)
